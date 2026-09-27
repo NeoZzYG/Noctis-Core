@@ -1,0 +1,7 @@
+{
+  "name": "noctis-core-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Site Noctis Core - connexion Discord",
+  "engines": { "node": ">=18" }
+}

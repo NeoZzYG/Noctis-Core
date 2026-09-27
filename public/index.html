@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Noctis Core - Communauté multigaming</title>
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
+<meta name="description" content="Communauté multigaming française : events, tournois et boutique. Unis par le jeu, portés par la passion.">
+<meta property="og:site_name" content="Noctis Core">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Noctis Core">
+<meta property="og:description" content="Communauté multigaming française : events, tournois et boutique. Unis par le jeu, portés par la passion.">
+<meta property="og:url" content="https://noctis-core.netlify.app/">
+<meta property="og:image" content="https://noctis-core.netlify.app/assets/og-image.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="597">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /Aperçu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="page-accueil">
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/assets/logo-mini.png" alt="" onerror="this.remove()">NOCTIS CORE</a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="/" aria-current="page">Accueil</a>
+      <a href="/tournois.html" >Tournois</a>
+      <a href="/classement.html" >Classement</a>
+      <a href="/boutique.html">Boutique</a>
+    </nav>
+    <div id="compte"></div>
+  </div>
+</header>
+<nav class="nav-mobile" aria-label="Navigation mobile">
+  <a href="/" aria-current="page">Accueil</a>
+  <a href="/tournois.html" >Tournois</a>
+  <a href="/classement.html" >Classement</a>
+  <a href="/boutique.html">Boutique</a>
+</nav>
+<main>
+<section class="scene">
+  <img class="decor gauche" src="/assets/decor-gauche.jpg" alt="" aria-hidden="true">
+  <img class="decor droit" src="/assets/decor-droit.jpg" alt="" aria-hidden="true">
+  <canvas id="braises" aria-hidden="true"></canvas>
+  <p class="slogan gauche">Unis par le jeu</p>
+  <p class="slogan droit">Portés par la passion</p>
+  <div class="scene-centre">
+    <h1 class="sr-only">Noctis Core, communauté multigaming française</h1>
+    <img class="logo-hero" src="/assets/logo.png" alt="Noctis Core : communauté, esport, passion" width="900" height="900">
+    <div class="actions" id="hero-actions">
+      <a class="btn btn-ghost btn-lg" data-discord href="#">Rejoindre le Discord</a>
+    </div>
+    <p class="en-ligne" id="en-ligne" hidden><i></i><span><b id="nb-en-ligne">0</b> en ligne sur le Discord</span></p>
+    <div id="erreur"></div>
+  </div>
+  <ul class="valeurs" aria-label="Nos valeurs">
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59C2.6 9.4 2 14.46 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.41-1.41A2 2 0 0 1 9.83 16h4.34a2 2 0 0 1 1.41.59L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.54-.6-6.58-.68-7.26A4 4 0 0 0 17.32 5z"/></svg>Multigaming</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>Communauté</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Compétition</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/></svg>Esprit d'équipe</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>Dépassement</li>
+  </ul>
+</section>
+
+<section class="bloc" id="bloc-event">
+  <div class="wrap">
+    <div class="entete-bloc"><h2>Prochains events</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">Ce mois-ci sur le serveur</p></div>
+    <ul class="events" id="events"><li class="events-vide">Chargement des events…</li></ul>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="wrap">
+    <div class="entete-bloc"><h2>Nos jeux</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">Multigaming</p></div>
+    <ul class="grille-jeux" id="jeux"></ul>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="wrap">
+    <div class="entete-bloc"><h2>La team</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">Esprit d'équipe</p></div>
+    <div class="chiffres">
+      <div><b id="c-membres">—</b><span>Membres</span></div>
+      <div><b id="c-enligne">—</b><span>En ligne</span></div>
+      <div><b id="c-jeux">—</b><span>Jeux</span></div>
+      <div><b id="c-tournois">—</b><span>Tournois</span></div>
+    </div>
+    <ul class="staff" id="staff"></ul>
+  </div>
+</section>
+
+<section class="bloc">
+  <div class="wrap">
+    <div class="entete-bloc"><h2>Porte les couleurs</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">Boutique officielle</p></div>
+    <ul class="vitrine" id="vitrine"></ul>
+    <p class="centre"><a class="btn btn-ghost btn-lg" href="/boutique.html">Voir toute la boutique</a></p>
+  </div>
+</section>
+
+<section class="rejoindre">
+  <h2>Rejoins la team</h2>
+  <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
+  <p>Un salon vocal toujours ouvert, des tournois entre nous et des gars qui jouent pour gagner ensemble.</p>
+  <a class="btn btn-or btn-xl" data-discord href="#" id="cta-final">Rejoindre le Discord</a>
+</section>
+
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <span>© 2026 Noctis Core [NcG]</span>
+    <nav aria-label="Réseaux">
+      <a data-discord href="#">Discord</a>
+      <a data-twitch href="#">Twitch</a>
+    </nav>
+  </div>
+</footer>
+<script src="/app.js"></script>
+<script>
+  // Jeux
+  document.getElementById("jeux").innerHTML = NOCTIS.jeux.map((j) => `<li class="jeu${j.image ? "" : " sans-image"}">
+      ${j.image ? `<img src="${esc(j.image)}" alt="" loading="lazy">` : `<span class="lettre" aria-hidden="true">${esc(j.nom.charAt(0))}</span>`}
+      <strong>${esc(j.nom)}</strong><span>${esc(j.detail)}</span></li>`).join("");
+
+  // La team
+  const fmt = (n) => Number(n).toLocaleString("fr-FR");
+  document.getElementById("c-jeux").textContent = NOCTIS.jeux.length;
+  document.getElementById("c-tournois").textContent = NOCTIS.tournoisJoues;
+  document.getElementById("staff").innerHTML = NOCTIS.staff.map((m) => `<li>
+      <div class="av">${m.avatar ? `<img src="${esc(m.avatar)}" alt="">` : `<span>${esc(m.nom.charAt(0))}</span>`}</div>
+      <strong>${esc(m.nom)}</strong><em style="color:${esc(m.couleur)}">${esc(m.role)}</em></li>`).join("");
+  const code = (NOCTIS.discordInvite.split("/").pop() || "").trim();
+  if (code && code !== "TON-INVITE") {
+    fetch(`https://discord.com/api/v10/invites/${code}?with_counts=true`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (!d) return;
+        document.getElementById("c-membres").textContent = fmt(d.approximate_member_count);
+        document.getElementById("c-enligne").textContent = fmt(d.approximate_presence_count);
+        document.getElementById("nb-en-ligne").textContent = fmt(d.approximate_presence_count);
+        document.getElementById("en-ligne").hidden = false;
+      }).catch(() => {});
+  }
+
+  // Vitrine boutique (3 premiers produits)
+  document.getElementById("vitrine").innerHTML = NOCTIS.produits.slice(0, 3).map((p) => `<li><a href="/boutique.html">
+      <div class="visuel"><img src="${esc(p.image)}" alt="${esc(p.nom)}" loading="lazy" onerror="this.src='/assets/logo.png';this.className='fallback'"></div>
+      <div class="ligne"><strong>${esc(p.nom)}</strong><span class="prix">${Number(p.prix).toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</span></div>
+      ${p.membres ? '<span class="reserve">Réservé aux membres</span>' : ""}</a></li>`).join("");
+
+  // Compte / boutons
+  afficherErreur();
+  document.getElementById("cta-final").insertAdjacentHTML("afterbegin", DISCORD_SVG);
+  initCompte().then((user) => {
+    document.getElementById("hero-actions").insertAdjacentHTML("afterbegin", user
+      ? '<a class="btn btn-or btn-lg" href="/profil.html">Voir mon profil</a>'
+      : `<a class="btn btn-or btn-lg" href="/api/auth-login">${DISCORD_SVG}Se connecter avec Discord</a>`);
+  });
+
+  // Header transparent -> opaque au scroll
+  const entete = document.querySelector(".entete");
+  addEventListener("scroll", () => entete.classList.toggle("defile", scrollY > 40), { passive: true });
+
+  // Events du mois (créés dans Discord, lus par /api/events)
+  const listeEv = document.getElementById("events");
+  const TZ = "Europe/Paris";
+  const pad = (n) => String(n).padStart(2, "0");
+  const jourParis = (d) => d.toLocaleDateString("fr-CA", { timeZone: TZ }); // AAAA-MM-JJ
+  function relatif(debut) {
+    const auj = new Date(jourParis(new Date())), j = new Date(jourParis(debut));
+    const diff = Math.round((j - auj) / 86400000);
+    if (diff === 0) return parseInt(debut.toLocaleString("fr-FR", { timeZone: TZ, hour: "2-digit", hourCycle: "h23" }), 10) >= 18 ? "Ce soir" : "Aujourd'hui";
+    if (diff === 1) return "Demain";
+    return `Dans ${diff} jours`;
+  }
+  function carteEv(e) {
+    const t = themeJeu(e.nom), debut = new Date(e.debut);
+    const date = debut.toLocaleString("fr-FR", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).replace(/^./, (l) => l.toUpperCase());
+    return `<li class="ev" style="--c:${t.couleur}" data-debut="${esc(e.debut)}" data-encours="${e.enCours ? 1 : 0}">
+      <div class="haut">
+        ${e.image ? `<img src="${esc(e.image)}" alt="" loading="lazy">` : ""}
+        <span class="sigle" aria-hidden="true">${esc(t.sigle)}</span>
+        <span class="tag">${esc(t.nom)}</span>
+        <span class="quand-rel"></span>
+      </div>
+      <div class="corps">
+        <h3>${esc(e.nom)}</h3>
+        <p class="date">${date}</p>
+        ${e.description ? `<p class="desc">${esc(e.description.replace(/[*_~`>#|]/g, "").trim())}</p>` : ""}
+        <div class="zone-decompte"></div>
+        <div class="pied-ev">
+          <span class="interesses">${e.interesses ? `${e.interesses} partant${e.interesses > 1 ? "s" : ""}` : "Sois le 1er"}</span>
+          <a class="btn btn-ev" href="${esc(e.lien)}" target="_blank" rel="noopener">Je participe</a>
+        </div>
+      </div>
+    </li>`;
+  }
+  function majDecomptes() {
+    let fini = false;
+    listeEv.querySelectorAll(".ev").forEach((li) => {
+      const debut = new Date(li.dataset.debut);
+      let s = Math.floor((debut - Date.now()) / 1000);
+      const badge = li.querySelector(".quand-rel"), zone = li.querySelector(".zone-decompte");
+      if (li.dataset.encours === "1" || s <= 0) {
+        if (!badge.classList.contains("live")) {
+          badge.className = "quand-rel live"; badge.textContent = "En cours";
+          zone.innerHTML = '<p class="live-msg">En direct sur le vocal</p>';
+          if (li.dataset.encours !== "1") fini = true;
+        }
+        return;
+      }
+      badge.textContent = relatif(debut);
+      const j = Math.floor(s / 86400); s %= 86400;
+      const h = Math.floor(s / 3600); s %= 3600;
+      const m = Math.floor(s / 60);
+      if (!zone.firstElementChild) zone.innerHTML = '<div class="mini-decompte" role="timer"><div><b></b><span>j</span></div><div><b></b><span>h</span></div><div><b></b><span>min</span></div><div><b></b><span>sec</span></div></div>';
+      const b = zone.querySelectorAll("b");
+      b[0].textContent = pad(j); b[1].textContent = pad(h); b[2].textContent = pad(m); b[3].textContent = pad(s % 60);
+    });
+    if (fini) setTimeout(chargerEvents, 90000); // on revérifie le statut Discord peu après le début
+  }
+  async function chargerEvents() {
+    try {
+      const r = await fetch("/api/events");
+      const { events } = await r.json();
+      listeEv.innerHTML = events && events.length
+        ? events.slice(0, 8).map(carteEv).join("")
+        : '<li class="events-vide">Aucun event prévu pour le moment. Les prochains seront annoncés sur le Discord.</li>';
+      majDecomptes();
+    } catch {
+      listeEv.innerHTML = '<li class="events-vide">Les events n\'ont pas pu être chargés. Ils sont toujours visibles sur le Discord.</li>';
+    }
+  }
+  chargerEvents();
+  setInterval(majDecomptes, 1000);
+  setInterval(chargerEvents, 5 * 60 * 1000); // nouveaux events créés sur Discord
+
+  // Braises tricolores
+  const cv = document.getElementById("braises"), ctx = cv.getContext("2d");
+  const calme = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, braises = [];
+  function taille() {
+    const r = Math.min(devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight; cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0);
+  }
+  function nouvelle(depart) {
+    const t = Math.random();
+    // 45% bleu a gauche, 45% rouge a droite, 10% or au centre
+    const [zx, c] = t < .45 ? [[0, .38], "70,110,255"] : t < .9 ? [[.62, 1], "235,45,55"] : [[.35, .65], "230,185,90"];
+    return { x: W * (zx[0] + Math.random() * (zx[1] - zx[0])), y: depart ? Math.random() * H : H + 10,
+      r: Math.random() * 1.8 + .4, vy: -(Math.random() * .7 + .25), vx: (Math.random() - .5) * .3,
+      vie: 0, max: 300 + Math.random() * 400, c, o: Math.random() * 6.28 };
+  }
+  function anime() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    for (let i = 0; i < braises.length; i++) {
+      const b = braises[i];
+      b.vie++; b.y += b.vy; b.x += b.vx + Math.sin((b.vie + b.o * 50) / 40) * .25;
+      const a = Math.sin(Math.PI * b.vie / b.max) * .9;
+      if (b.vie > b.max || b.y < -10) { braises[i] = nouvelle(false); continue; }
+      const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r * 4);
+      g.addColorStop(0, `rgba(${b.c},${a})`); g.addColorStop(1, `rgba(${b.c},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, b.y, b.r * 4, 0, 6.28); ctx.fill();
+    }
+    requestAnimationFrame(anime);
+  }
+  taille(); addEventListener("resize", taille);
+  if (!calme) {
+    braises = Array.from({ length: Math.round(Math.min(W, 1600) / 12) }, () => nouvelle(true));
+    anime();
+  }
+</script>
+</body></html>

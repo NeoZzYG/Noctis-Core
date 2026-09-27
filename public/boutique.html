@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boutique - Noctis Core</title>
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
+<meta name="description" content="Le merch officiel Noctis Core : t-shirts, hoodies et maillots d'équipe.">
+<meta property="og:site_name" content="Noctis Core">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Boutique · Noctis Core">
+<meta property="og:description" content="Le merch officiel Noctis Core : t-shirts, hoodies et maillots d'équipe.">
+<meta property="og:url" content="https://noctis-core.netlify.app/boutique.html">
+<meta property="og:image" content="https://noctis-core.netlify.app/assets/og-image.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="597">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /Aperçu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/assets/logo-mini.png" alt="" onerror="this.remove()">NOCTIS CORE</a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="/" >Accueil</a>
+      <a href="/tournois.html">Tournois</a>
+      <a href="/classement.html" >Classement</a>
+      <a href="/boutique.html" aria-current="page">Boutique</a>
+    </nav>
+    <div id="compte"></div>
+  </div>
+</header>
+<nav class="nav-mobile" aria-label="Navigation mobile">
+  <a href="/" >Accueil</a>
+  <a href="/tournois.html">Tournois</a>
+  <a href="/classement.html" >Classement</a>
+  <a href="/boutique.html" aria-current="page">Boutique</a>
+</nav>
+<main>
+<div class="wrap">
+  <section class="boutique-tete">
+    <h1>Boutique</h1>
+    <p>Le merch officiel Noctis. Certaines pièces sont réservées aux membres du serveur.</p>
+  </section>
+  <ul class="produits" id="produits"></ul>
+</div>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <span>© 2026 Noctis Core [NcG]</span>
+    <nav aria-label="Réseaux">
+      <a data-discord href="#">Discord</a>
+      <a data-twitch href="#">Twitch</a>
+    </nav>
+  </div>
+</footer>
+<script src="/app.js"></script>
+
+<script>
+  const eur = (n) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+  initCompte().then((u) => {
+    const membre = u && u.isMember;
+    document.getElementById("produits").innerHTML = NOCTIS.produits.map((p) => {
+      let action, note = "";
+      if (!p.lien) {
+        action = '<span class="btn btn-ghost" aria-disabled="true">Bientôt</span>';
+      } else if (p.membres && !membre) {
+        action = u ? `<a class="btn btn-ghost" href="${NOCTIS.discordInvite}">Rejoindre</a>` : '<a class="btn btn-ghost" href="/api/auth-login">Connexion</a>';
+        note = u ? "Réservé aux membres : rejoins le serveur pour le commander." : "Réservé aux membres : connecte-toi avec Discord.";
+      } else {
+        action = `<a class="btn btn-discord" href="${esc(p.lien)}" target="_blank" rel="noopener">Commander</a>`;
+        if (p.membres) note = "Réservé aux membres";
+      }
+      return `<li class="produit">
+        <div class="visuel"><img src="${esc(p.image)}" alt="${esc(p.nom)}" onerror="this.outerHTML='<span class=sans-image>NC</span>'"></div>
+        <h2>${esc(p.nom)}</h2>
+        <div class="ligne"><span class="prix">${eur(p.prix)}</span>${action}</div>
+        ${note ? `<p class="note">${note}</p>` : ""}
+      </li>`;
+    }).join("");
+  });
+</script>
+</body></html>

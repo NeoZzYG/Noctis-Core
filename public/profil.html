@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon profil - Noctis Core</title>
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
+<meta name="description" content="Ton profil Noctis Core, relié à ton compte Discord.">
+<meta property="og:site_name" content="Noctis Core">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Mon profil · Noctis Core">
+<meta property="og:description" content="Ton profil Noctis Core, relié à ton compte Discord.">
+<meta property="og:url" content="https://noctis-core.netlify.app/profil.html">
+<meta property="og:image" content="https://noctis-core.netlify.app/assets/og-image.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="597">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /Aperçu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/assets/logo-mini.png" alt="" onerror="this.remove()">NOCTIS CORE</a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="/" >Accueil</a>
+      <a href="/tournois.html" >Tournois</a>
+      <a href="/classement.html" >Classement</a>
+      <a href="/boutique.html">Boutique</a>
+    </nav>
+    <div id="compte"></div>
+  </div>
+</header>
+<nav class="nav-mobile" aria-label="Navigation mobile">
+  <a href="/" >Accueil</a>
+  <a href="/tournois.html" >Tournois</a>
+  <a href="/classement.html" >Classement</a>
+  <a href="/boutique.html">Boutique</a>
+</nav>
+<main>
+<div class="wrap" id="contenu"><p class="vide">Chargement du profil…</p></div>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <span>© 2026 Noctis Core [NcG]</span>
+    <nav aria-label="Réseaux">
+      <a data-discord href="#">Discord</a>
+      <a data-twitch href="#">Twitch</a>
+    </nav>
+  </div>
+</footer>
+<script src="/app.js"></script>
+<script>
+  initCompte().then((u) => {
+    const c = document.getElementById("contenu");
+    if (!u) {
+      c.innerHTML = `<div class="vide"><h1>Connecte-toi</h1><p>Ton profil Noctis se crée automatiquement à ta première connexion avec Discord.</p>${boutonConnexion()}</div>`;
+      return;
+    }
+    const depuis = u.joinedAt ? new Date(u.joinedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—";
+    c.innerHTML = `
+      <section class="profil">
+        <img src="${esc(u.avatar)}" alt="Avatar de ${esc(u.name)}">
+        <div>
+          <h1>${esc(u.name)}</h1>
+          <p class="pseudo">@${esc(u.username)}</p>
+          ${u.isMember ? '<span class="badge badge-membre">Membre Noctis</span>' : '<span class="badge badge-externe">Pas encore sur le serveur</span>'}
+        </div>
+      </section>
+      ${u.isMember ? `
+      <dl class="infos">
+        <div><dt>Membre depuis</dt><dd>${depuis}</dd></div>
+        <div><dt>Rôles sur le serveur</dt><dd>${u.roles.length}</dd></div>
+        <div><dt>Tournois joués</dt><dd>0</dd></div>
+      </dl>` : `
+      <div class="bandeau-rejoindre"><div><h2>Rejoins le serveur</h2><p class="pseudo">Une fois sur le Discord, déconnecte-toi puis reconnecte-toi pour activer ton profil membre.</p></div><a class="btn btn-discord" href="${NOCTIS.discordInvite}">Rejoindre le Discord</a></div>`}
+      <p style="margin:2.5rem 0"><a class="btn btn-ghost" href="/api/logout">Se déconnecter</a></p>`;
+  });
+</script>
+</body></html>
