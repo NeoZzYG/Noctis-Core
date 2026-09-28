@@ -64,7 +64,11 @@ Quand quelqu'un colle le lien du site sur Discord, une carte s'affiche : nom "No
 
 ## Espace admin (tout se gère depuis le site)
 Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les admins).
-- **Qui est admin ?** Le propriétaire du serveur Discord, et tous les membres qui ont un rôle avec la permission **Administrateur**. Pour ajouter quelqu'un d'autre sans lui donner ce rôle : variable Netlify `ADMIN_IDS` avec les identifiants Discord séparés par des virgules
+- **Qui est admin ?** Uniquement le **propriétaire du serveur Discord**, plus les personnes que tu désignes dans Netlify :
+  - `ADMIN_IDS` : identifiants Discord de membres (clic droit sur le membre → Copier l'identifiant utilisateur), séparés par des virgules
+  - `ADMIN_ROLE_IDS` : identifiants de rôles (Paramètres du serveur → Rôles → clic droit sur le rôle → Copier l'identifiant), séparés par des virgules
+  - La permission "Administrateur" sur Discord ne donne **pas** accès à l'admin du site
+  - Après avoir modifié ces variables : Deploys → Trigger deploy
 - **Onglets** : Events, Tournois, Jeux, Staff, Boutique, Palmarès, Règlement
 - **Events** : les soirées de la Noctis, avec un badge **☾ Chill** ou **⚔ Compétitif** au choix
 - **Tournois et Palmarès** : seulement les jeux compétitifs (LoL, CoD et Valorant). Pour en ajouter un, modifie `jeuxTournois` en haut de `public/app.js`

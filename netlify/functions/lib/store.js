@@ -2,7 +2,6 @@
 const { connectLambda, getStore } = require("@netlify/blobs");
 
 const API = "https://discord.com/api/v10";
-const ADMINISTRATOR = 0x8n;
 
 function store(event) {
   connectLambda(event);
@@ -33,16 +32,19 @@ async function serveur() {
   return g;
 }
 
-// Admin = propriétaire du serveur, ou rôle avec la permission Administrateur, ou ID dans ADMIN_IDS
+// Admin = UNIQUEMENT le propriétaire du serveur + les personnes désignées :
+//  - ADMIN_IDS      : identifiants Discord de membres, séparés par des virgules
+//  - ADMIN_ROLE_IDS : identifiants de rôles Discord, séparés par des virgules
+// Avoir la permission "Administrateur" sur Discord ne suffit PAS.
+const liste = (v) => (v || "").split(",").map((x) => x.trim()).filter(Boolean);
 async function estAdmin(session, rolesDuMembre) {
   if (!session) return false;
-  const ids = (process.env.ADMIN_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (ids.includes(session.id)) return true;
-  const g = await serveur();
-  if (!g) return false;
-  if (g.owner_id === session.id) return true;
+  if (liste(process.env.ADMIN_IDS).includes(session.id)) return true;
+  const rolesAdmin = liste(process.env.ADMIN_ROLE_IDS);
   const roles = rolesDuMembre || session.roles || [];
-  return (g.roles || []).some((r) => roles.includes(r.id) && (BigInt(r.permissions) & ADMINISTRATOR) === ADMINISTRATOR);
+  if (rolesAdmin.some((r) => roles.includes(r))) return true;
+  const g = await serveur();
+  return Boolean(g && g.owner_id === session.id);
 }
 
 // Vérification "fraîche" des rôles au moment d'enregistrer
