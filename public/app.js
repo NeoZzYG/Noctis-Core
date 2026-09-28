@@ -251,3 +251,19 @@ function actionProduit(p, grand) {
   if (p.membres && !(MOI && MOI.isMember)) return { html: `<a class="btn btn-ghost${taille}" href="${NOCTIS.discordInvite}">Rejoindre le serveur</a>`, note: "Réservé aux membres du serveur Noctis." };
   return { html: `<a class="btn btn-or${taille}" href="${esc(p.lien)}" target="_blank" rel="noopener">Commander</a>`, note: p.membres ? "Réservé aux membres" : "" };
 }
+
+// ============ BARRE DES RUBRIQUES (ordi) : présente sur toutes les pages ============
+const RUBRIQUES_ACCUEIL = [["accueil", "Accueil"], ["jeux", "Nos jeux"], ["events", "Events"], ["team", "La team"], ["boutique", "Boutique"], ["discord", "Rejoindre"]];
+(function barreRubriques() {
+  const b = document.body;
+  if (b.classList.contains("page-connexion") || document.querySelector(".barre-rubriques")) return;
+  const surAccueil = b.classList.contains("page-accueil");
+  const courant = /\/(boutique|produit)\.html/.test(location.pathname) ? "boutique" : "";
+  const nav = document.createElement("nav");
+  nav.className = "barre-rubriques";
+  nav.setAttribute("aria-label", "Rubriques de l'accueil");
+  nav.innerHTML = RUBRIQUES_ACCUEIL.map(([id, nom]) => surAccueil
+    ? `<button type="button" data-aller="${id}">${nom}</button>`
+    : `<a href="/${id === "accueil" ? "" : `#${id}`}"${id === courant ? ' aria-current="true"' : ""}>${nom}</a>`).join("");
+  b.appendChild(nav);
+})();

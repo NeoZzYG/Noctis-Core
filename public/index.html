@@ -110,8 +110,15 @@
 <section class="rejoindre" data-rubrique="discord">
   <h2>On se retrouve en vocal</h2>
   <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
-  <p>Un salon vocal toujours ouvert, des tournois entre nous et des gars qui jouent pour gagner ensemble. Il ne manque plus que toi.</p>
-  <a class="btn btn-or btn-xl" data-discord href="#" id="cta-final">Ouvrir le Discord</a>
+  <p>Un salon vocal toujours ouvert, des tournois entre nous et des gars qui jouent pour gagner ensemble.</p>
+  <div class="carte-invite">
+    <img src="/assets/logo-mini.png" alt="" width="64" height="64">
+    <div class="invite-infos">
+      <strong>Noctis Core</strong>
+      <span><i class="pastille-verte"></i><b id="inv-enligne">—</b> en ligne <i class="pastille-grise"></i><b id="inv-membres">—</b> membres</span>
+    </div>
+    <a class="btn btn-or" data-discord href="#" id="cta-final">Ouvrir le Discord</a>
+  </div>
 </section>
 
 </main>
@@ -135,12 +142,9 @@
   addEventListener("scroll", () => entete.classList.toggle("defile", scrollY > 40), { passive: true });
 
   // ----- Sur ordinateur : une rubrique à la fois, on navigue en cliquant -----
-  const RUBRIQUES = [["accueil", "Accueil"], ["jeux", "Nos jeux"], ["events", "Events"], ["team", "La team"], ["boutique", "Boutique"], ["discord", "Rejoindre"]];
+  const RUBRIQUES = RUBRIQUES_ACCUEIL;
   const ecranLarge = matchMedia("(min-width: 1024px)");
-  const barre = document.createElement("nav");
-  barre.className = "barre-rubriques"; barre.setAttribute("aria-label", "Rubriques de l'accueil");
-  barre.innerHTML = RUBRIQUES.map(([id, nom]) => `<button type="button" data-aller="${id}">${nom}</button>`).join("");
-  document.body.appendChild(barre);
+  const barre = document.querySelector(".barre-rubriques");
   let rubrique = "accueil";
 
   function allerA(id, historique = true) {
@@ -188,6 +192,8 @@
       document.getElementById("c-membres").textContent = fmt(d.approximate_member_count);
       document.getElementById("c-enligne").textContent = fmt(d.approximate_presence_count);
       document.getElementById("nb-en-ligne").textContent = fmt(d.approximate_presence_count);
+      document.getElementById("inv-enligne").textContent = fmt(d.approximate_presence_count);
+      document.getElementById("inv-membres").textContent = fmt(d.approximate_member_count);
       document.getElementById("en-ligne").hidden = false;
     }).catch(() => {});
 
@@ -236,7 +242,7 @@
       bandeau.style.setProperty("--c", t.couleur);
       bandeau.innerHTML = `<span>Events <b>${esc(nomJeu)}</b></span>
         ${nbTournois ? `<a href="/tournois.html">${nbTournois} tournoi${nbTournois > 1 ? "s" : ""} à venir sur ce jeu →</a>` : ""}
-        <button type="button" data-tout-voir>Voir tous les events ✕</button>`;
+        <button type="button" data-tout-voir>Voir tous les events</button>`;
     }
     document.querySelectorAll("#jeux .jeu").forEach((li) => li.classList.toggle("actif", Boolean(filtreJeu) && memeJeu(li.dataset.jeu, filtreJeu)));
   }
