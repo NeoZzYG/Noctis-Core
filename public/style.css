@@ -769,3 +769,11 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 100; pointer-even
   .fiche-produit { grid-template-columns: 1fr; }
   .infos-produit { position: static; }
 }
+
+/* Photos produit : on montre l'image entière, sans rogner */
+.galerie .principal img, .produit .visuel img, .vitrine .visuel img { object-fit: contain; }
+.galerie .principal { background: radial-gradient(circle at 50% 40%, rgba(198,148,40,.12), transparent 65%), #0a0b10; }
+.miniatures img { object-fit: cover; }
+.galerie .principal img, .produit .visuel img, .vitrine .visuel img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.produit .visuel, .vitrine .visuel { position: relative; }
+.vitrine .visuel img.fallback { position: static; width: 55%; height: auto; }

@@ -1,6 +1,4 @@
-const { cookie, SESSION_COOKIE } = require("./lib/session");
+import { v2 } from "./lib/v2.mjs";
+import fonction from "./lib/handlers/logout.cjs";
 
-exports.handler = async () => ({
-  statusCode: 302,
-  headers: { Location: "/connexion.html", "Set-Cookie": cookie(SESSION_COOKIE, "", 0) },
-});
+export default v2(fonction.handler);
