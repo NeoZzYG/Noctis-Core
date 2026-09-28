@@ -209,3 +209,20 @@ function majDecomptes(racine, classeDecompte, messageLive) {
     b[0].textContent = pad(j); b[1].textContent = pad(h); b[2].textContent = pad(Math.floor(s / 60)); b[3].textContent = pad(s % 60);
   });
 }
+
+// Statut "vu sur le site" d'un membre du staff
+function depuis(iso) {
+  const min = Math.floor((Date.now() - new Date(iso)) / 60000);
+  if (min < 60) return `${Math.max(1, min)} min`;
+  if (min < 1440) return `${Math.floor(min / 60)} h`;
+  const j = Math.floor(min / 1440);
+  return j === 1 ? "hier" : `${j} jours`;
+}
+function statutStaff(s) {
+  if (!s.membreId) return "";
+  if (!s.vu) return '<span class="statut">Pas encore venu sur le site</span>';
+  if (Date.now() - new Date(s.vu) < 5 * 60000) return '<span class="statut en-ligne"><i></i>En ligne sur le site</span>';
+  const d = depuis(s.vu);
+  return `<span class="statut"><i></i>Vu ${d === "hier" ? "hier" : `il y a ${d}`}</span>`;
+}
+const avatarStaff = (s) => s.avatar || s.avatarAuto || s.avatarDiscord || "";

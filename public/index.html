@@ -194,8 +194,8 @@
     document.getElementById("c-jeux").textContent = NOCTIS.jeux.length;
     document.getElementById("c-tournois").textContent = (NOCTIS.palmares || []).length;
     document.getElementById("staff").innerHTML = NOCTIS.staff.map((m) => `<li>
-      <div class="av">${m.avatar ? `<img src="${esc(m.avatar)}" alt="">` : `<span>${esc(m.nom.charAt(0))}</span>`}</div>
-      <strong>${esc(m.nom)}</strong><em style="color:${esc(m.couleur)}">${esc(m.role)}</em></li>`).join("");
+      <div class="av">${avatarStaff(m) ? `<img src="${esc(avatarStaff(m))}" alt="">` : `<span>${esc(m.nom.charAt(0))}</span>`}</div>
+      <strong>${esc(m.nom)}</strong><em style="color:${esc(m.couleur)}">${esc(m.role)}</em>${statutStaff(m)}</li>`).join("");
 
     // Vitrine boutique (3 premiers produits)
     document.getElementById("vitrine").innerHTML = NOCTIS.produits.slice(0, 3).map((p) => `<li><a href="/boutique.html">

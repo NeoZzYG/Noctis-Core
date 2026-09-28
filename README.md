@@ -72,6 +72,8 @@ Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les
 - **Onglets** : Events, Tournois, Jeux, Staff, Boutique, Palmarès, Règlement
 - **Events** : les soirées de la Noctis, avec un badge **☾ Chill** ou **⚔ Compétitif** au choix
 - **Tournois et Palmarès** : seulement les jeux compétitifs (LoL, CoD et Valorant). Pour en ajouter un, modifie `jeuxTournois` en haut de `public/app.js`
+- **Staff** : tape un pseudo dans "Ajouter un membre du serveur" pour le choisir parmi les membres Discord. Sa photo Discord et son statut ("En ligne sur le site", "Vu il y a 3 h") s'affichent tout seuls sur l'accueil. Être dans le staff ne donne pas accès à l'admin
+  - Pour chercher dans **tout le serveur** (et pas seulement parmi les membres déjà venus sur le site) : portail développeur Discord → ton appli → **Bot** → active **Server Members Intent** → Enregistrer
 - **Images** : bouton "Choisir une image", elle est redimensionnée et stockée automatiquement
 - Clique sur **Enregistrer** : c'est en ligne tout de suite, sans redéployer
 - Les events et tournois du site sont **indépendants de Discord** : les membres s'inscrivent directement sur le site (bouton "Je participe" / "S'inscrire"), leur avatar apparaît dans la liste des inscrits

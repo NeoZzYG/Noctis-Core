@@ -508,3 +508,22 @@ button.btn { font-family: var(--texte); }
 .ev .ambiance.competitif { background: rgba(198,148,40,.2); color: #f0cf7a; border: 1px solid rgba(198,148,40,.6); }
 .champ select { width: 100%; padding: .65rem .8rem; border-radius: 4px; border: 1px solid #262936; background: #050507; color: var(--blanc); font: 400 1rem var(--texte); color-scheme: dark; }
 .champ select:focus { outline: none; border-color: var(--or); box-shadow: 0 0 0 3px rgba(198,148,40,.18); }
+
+/* ================= STAFF STATUT ================= */
+.staff .statut { display: inline-flex; align-items: center; gap: .4rem; margin-top: .6rem; font-size: .8rem; color: var(--gris); }
+.staff .statut i { width: 8px; height: 8px; border-radius: 50%; background: #4b5060; }
+.staff .statut.en-ligne { color: #7ee2a0; }
+.staff .statut.en-ligne i { background: #3ba55d; box-shadow: 0 0 0 3px rgba(59,165,93,.2); }
+.staff em { display: block; }
+.recherche-membres { margin-bottom: 1.2rem; padding: 1.1rem; background: #0b0c11; border: 1px solid rgba(198,148,40,.35); border-radius: 6px; }
+.res-membres { list-style: none; padding: 0; margin: .8rem 0 0; display: grid; gap: .4rem; max-height: 320px; overflow-y: auto; }
+.res-membres li { display: flex; align-items: center; gap: .8rem; padding: .55rem .7rem; border-radius: 4px; background: #050507; border: 1px solid #1c1f29; }
+.res-membres img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex: none; }
+.res-membres span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.res-membres small { color: var(--gris); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-membres .btn { padding: .4rem .8rem; font-size: .88rem; }
+.res-membres em { color: var(--gris); font-size: .85rem; font-style: normal; }
+.res-membres .res-info { color: var(--gris); font-size: .9rem; background: none; border: 0; padding: .3rem 0; }
+.champ input[type=search] { width: 100%; padding: .65rem .8rem; border-radius: 4px; border: 1px solid #262936; background: #050507; color: var(--blanc); font: 400 1rem var(--texte); }
+.champ input[type=search]:focus { outline: none; border-color: var(--or); box-shadow: 0 0 0 3px rgba(198,148,40,.18); }
+.mini-av { width: 22px; height: 22px; border-radius: 50%; vertical-align: middle; margin-right: .4rem; }

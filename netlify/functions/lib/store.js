@@ -19,6 +19,19 @@ async function ecrireContenu(event, contenu) {
   await store(event).setJSON("contenu", contenu);
 }
 
+// Registre des membres venus sur le site : { [id]: { id, nom, username, avatar, premiereVisite, derniereVisite } }
+async function lireMembres(event) {
+  return (await store(event).get("membres", { type: "json" })) || {};
+}
+// Note le passage d'un membre (au plus une écriture par minute et par membre)
+async function noterVisite(event, session) {
+  const membres = await lireMembres(event);
+  const m = membres[session.id], now = new Date().toISOString();
+  if (m && Date.now() - new Date(m.derniereVisite).getTime() < 60000 && m.nom === session.name && m.avatar === session.avatar) return;
+  membres[session.id] = { id: session.id, nom: session.name, username: session.username, avatar: session.avatar, premiereVisite: (m && m.premiereVisite) || now, derniereVisite: now };
+  await store(event).setJSON("membres", membres);
+}
+
 // Infos du serveur (propriétaire + rôles), gardées 60 s en mémoire
 let cacheServeur = { t: 0, data: null };
 async function serveur() {
@@ -61,4 +74,4 @@ function json(code, body, extra = {}) {
   return { statusCode: code, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...extra }, body: JSON.stringify(body) };
 }
 
-module.exports = { store, lireContenu, ecrireContenu, estAdmin, estAdminLive, json, VIDE };
+module.exports = { store, lireContenu, ecrireContenu, lireMembres, noterVisite, estAdmin, estAdminLive, json, VIDE };

@@ -75,9 +75,10 @@
       nouveau: () => ({ nom: "", sigle: "", couleur: "#c69428", detail: "", image: "" }), apercu: (j) => j.nom || "Nouveau jeu",
       champs: [{ k: "nom", l: "Nom du jeu", t: "text", ph: "League of Legends" }, { k: "sigle", l: "Sigle (5 lettres max)", t: "text", ph: "LoL" },
         { k: "couleur", l: "Couleur", t: "color" }, { k: "detail", l: "Petite description", t: "text", ph: "Customs et Flex tous les soirs", large: 1 }, { k: "image", l: "Visuel (format portrait)", t: "image" }] },
-    staff: { label: "Staff", aide: "Les membres du staff mis en avant dans « La team » sur l'accueil.",
-      nouveau: () => ({ nom: "", role: "", couleur: "#c69428", avatar: "" }), apercu: (s) => s.nom ? `${s.nom} · ${s.role}` : "Nouveau membre",
-      champs: [{ k: "nom", l: "Pseudo", t: "text" }, { k: "role", l: "Rôle", t: "text", ph: "Modérateur" }, { k: "couleur", l: "Couleur du rôle", t: "color" }, { k: "avatar", l: "Photo (carrée)", t: "image" }] },
+    staff: { label: "Staff", aide: "Les membres du staff mis en avant dans « La team » sur l'accueil, avec leur statut sur le site. Être dans le staff ne donne PAS accès à l'admin.",
+      nouveau: () => ({ nom: "", role: "", couleur: "#c69428", avatar: "" }), apercu: (s) => `${s.nom || "Nouveau membre"}${s.role ? ` · ${s.role}` : ""}${s.username ? ` (@${s.username})` : ""}`,
+      champs: [{ k: "nom", l: "Pseudo affiché", t: "text" }, { k: "role", l: "Rôle", t: "text", ph: "Modérateur" }, { k: "couleur", l: "Couleur du rôle", t: "color" },
+        { k: "avatar", l: "Photo perso (optionnel : sinon sa photo Discord)", t: "image" }] },
     produits: { label: "Boutique", aide: "Les articles de la boutique. Pour vendre, colle le lien de paiement Stripe (Payment Link) du produit.",
       nouveau: () => ({ nom: "", prix: 0, image: "", lien: "", membres: false }), apercu: (p) => p.nom || "Nouveau produit",
       champs: [{ k: "nom", l: "Nom", t: "text", ph: "Hoodie Noctis" }, { k: "prix", l: "Prix (€)", t: "number" }, { k: "lien", l: "Lien de paiement (vide = « Bientôt »)", t: "text", ph: "https://buy.stripe.com/…", large: 1 },
@@ -132,6 +133,7 @@
           <button type="button" data-act="suppr" data-i="${i}" class="suppr">Supprimer</button>
         </span></header>
       <div class="champs">${s.champs.map((c) => champ(c, item[c.k], i)).join("")}</div>${insc}
+      ${onglet === "staff" && item.membreId ? `<p class="insc-admin">${(item.avatarAuto || item.avatarDiscord) && !item.avatar ? `<img class="mini-av" src="${esc(item.avatarAuto || item.avatarDiscord)}" alt="">` : ""}Relié au compte Discord${item.username ? ` <b>@${esc(item.username)}</b>` : ""} · ${statutStaff(item) || "statut inconnu"}</p>` : ""}
     </article>`;
   }
 
@@ -142,6 +144,11 @@
       <nav class="onglets" aria-label="Sections">${Object.entries(SCHEMA).map(([k, v]) =>
         `<button type="button" data-onglet="${k}"${k === onglet ? ' aria-current="true"' : ""}>${v.label}<small>${etat[k].length}</small></button>`).join("")}</nav>
       <div class="entete-onglet"><p>${esc(s.aide)}</p><button type="button" class="btn btn-or" data-act="ajouter">+ Ajouter</button></div>
+      ${onglet === "staff" ? `<div class="recherche-membres">
+        <label class="champ large"><span class="lab">Ajouter un membre du serveur</span>
+          <input type="search" id="q-membre" placeholder="Tape un pseudo Discord…" autocomplete="off"></label>
+        <ul id="res-membres" class="res-membres"></ul>
+      </div>` : ""}
       <div class="cartes-admin">${liste.length ? liste.map((it, i) => carte(it, i, liste.length)).join("") : '<p class="events-vide">Rien pour l\'instant. Clique sur « + Ajouter ».</p>'}</div>
       <datalist id="liste-jeux">${noms.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>
       <div class="barre-enregistrer${modifie ? " visible" : ""}">
@@ -248,6 +255,39 @@
     };
     if (src.majLe) majInfo = `Dernière mise à jour le ${new Date(src.majLe).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}${src.majPar ? ` par ${src.majPar}` : ""}`;
   }
+
+  // Recherche de membres (onglet Staff)
+  let minuteur;
+  async function chercherMembres(q) {
+    const zone = document.getElementById("res-membres");
+    if (!zone) return;
+    zone.innerHTML = '<li class="res-info">Recherche…</li>';
+    try {
+      const d = await (await fetch(`/api/admin-membres?q=${encodeURIComponent(q)}`)).json();
+      const deja = new Set(etat.staff.map((s) => s.membreId).filter(Boolean));
+      zone.innerHTML = (d.membres || []).length ? d.membres.map((m) => `<li>
+          <img src="${esc(m.avatar)}" alt=""><span><strong>${esc(m.nom)}</strong><small>@${esc(m.username || "")} · ${m.vu ? `vu sur le site il y a ${depuis(m.vu)}` : "pas encore venu sur le site"}</small></span>
+          ${deja.has(m.id) ? '<em>Déjà dans le staff</em>' : `<button type="button" class="btn btn-ghost" data-ajout-membre='${esc(JSON.stringify(m))}'>Ajouter</button>`}</li>`).join("")
+        : `<li class="res-info">${q ? "Aucun membre trouvé." : "Aucun membre n'est encore venu sur le site."}</li>`;
+      if (d.source === "site" && q) zone.insertAdjacentHTML("beforeend", '<li class="res-info">Recherche limitée aux membres déjà venus sur le site. Active « Server Members Intent » sur le bot pour chercher dans tout le serveur.</li>');
+    } catch { zone.innerHTML = '<li class="res-info">La recherche n\'a pas marché, réessaie.</li>'; }
+  }
+  racine.addEventListener("input", (ev) => {
+    if (ev.target.id !== "q-membre") return;
+    clearTimeout(minuteur);
+    minuteur = setTimeout(() => chercherMembres(ev.target.value.trim()), 350);
+  });
+  racine.addEventListener("focusin", (ev) => { if (ev.target.id === "q-membre" && !ev.target.value) chercherMembres(""); });
+  racine.addEventListener("click", (ev) => {
+    const b = ev.target.closest("[data-ajout-membre]");
+    if (!b) return;
+    const m = JSON.parse(b.dataset.ajoutMembre);
+    etat.staff.push({ id: id(), membreId: m.id, username: m.username, nom: m.nom, role: "", couleur: "#c69428", avatar: "", avatarDiscord: m.avatar, vu: m.vu });
+    modifie = true; rendre();
+    const cartes = racine.querySelectorAll(".carte-admin");
+    cartes[cartes.length - 1].scrollIntoView({ behavior: "smooth", block: "center" });
+    cartes[cartes.length - 1].querySelector('[data-k="role"]').focus();
+  });
 
   addEventListener("beforeunload", (e) => { if (modifie) { e.preventDefault(); e.returnValue = ""; } });
 
