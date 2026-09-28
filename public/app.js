@@ -2,6 +2,8 @@
 const NOCTIS = {
   discordInvite: "https://discord.gg/gkhTGB5mc7",
   twitch: "https://www.twitch.tv/TA-CHAINE",
+  // Jeux proposés dans l'onglet Tournois et Palmarès de l'espace admin (le compétitif)
+  jeuxTournois: ["League of Legends", "Call of Duty", "Valorant"],
   // Palmarès : ajoute une ligne à la fin de chaque tournoi (le plus récent en haut)
   // Le nombre de tournois affiché sur l'accueil se calcule tout seul à partir de cette liste.
   palmares: [
@@ -59,9 +61,11 @@ function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+let MOI = null;
 async function initCompte() {
   const zone = document.getElementById("compte");
   const user = await getUser();
+  MOI = user;
   if (zone) {
     zone.innerHTML = user
       ? `<a class="avatar-mini" href="/profil.html"><img src="${esc(user.avatar)}" alt="">${esc(user.name)}</a>`
@@ -100,7 +104,108 @@ const THEMES_JEUX = [
   { mots: ["fifa", "fc 2", "ea fc"], nom: "EA FC", sigle: "FC", couleur: "#20c997" },
 ];
 function themeJeu(nom) {
-  const n = ` ${nom.toLowerCase()} `;
-  return THEMES_JEUX.find((t) => t.mots.some((m) => new RegExp(`[^a-z0-9]${m}`).test(n)))
-    || { nom: "Noctis", sigle: "NC", couleur: "#c69428" };
+  const n = ` ${(nom || "").toLowerCase()} `;
+  const auto = THEMES_JEUX.find((t) => t.mots.some((m) => new RegExp(`[^a-z0-9]${m}`).test(n)));
+  const perso = (NOCTIS.jeux || []).find((j) => j.nom && n.trim() === j.nom.toLowerCase().trim());
+  if (perso) return { nom: perso.nom, sigle: perso.sigle || (auto && auto.sigle) || perso.nom.slice(0, 3), couleur: perso.couleur || (auto && auto.couleur) || "#c69428", image: perso.image };
+  return auto || { nom: "Noctis", sigle: "NC", couleur: "#c69428" };
+}
+
+// ============ CONTENU MODIFIABLE DEPUIS L'ESPACE ADMIN ============
+// Tant que rien n'a été enregistré dans l'admin, le site utilise les valeurs du haut de ce fichier.
+let ADMIN = false;
+const TZ = "Europe/Paris";
+const pad = (n) => String(n).padStart(2, "0");
+
+async function chargerContenu() {
+  try {
+    const r = await fetch("/api/contenu", { credentials: "same-origin" });
+    if (r.ok) {
+      const d = await r.json();
+      ADMIN = Boolean(d.admin);
+      if (d.contenu) ["events", "tournois", "jeux", "staff", "produits", "palmares", "reglement"].forEach((k) => {
+        if (Array.isArray(d.contenu[k])) NOCTIS[k] = d.contenu[k];
+      });
+    }
+  } catch {}
+  NOCTIS.events = NOCTIS.events || [];
+  NOCTIS.tournois = NOCTIS.tournois || [];
+  if (ADMIN) document.querySelectorAll(".nav, .nav-mobile").forEach((n) => {
+    if (!n.querySelector(".lien-admin")) n.insertAdjacentHTML("beforeend",
+      `<a href="/admin.html" class="lien-admin"${location.pathname.startsWith("/admin") ? ' aria-current="page"' : ""}>Admin</a>`);
+  });
+  return NOCTIS;
+}
+
+// Events / tournois à venir ou en cours (on les garde affichés 4 h après le début)
+function aVenir(liste) {
+  const limite = Date.now() - 4 * 3600e3;
+  return (liste || []).filter((e) => e.date && new Date(e.date).getTime() > limite)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+const jourParis = (d) => d.toLocaleDateString("fr-CA", { timeZone: TZ });
+function relatif(debut) {
+  const diff = Math.round((new Date(jourParis(debut)) - new Date(jourParis(new Date()))) / 86400000);
+  if (diff === 0) return parseInt(debut.toLocaleString("fr-FR", { timeZone: TZ, hour: "2-digit", hourCycle: "h23" }), 10) >= 18 ? "Ce soir" : "Aujourd'hui";
+  return diff === 1 ? "Demain" : `Dans ${diff} jours`;
+}
+function dateLongue(d, court) {
+  return new Date(d).toLocaleString("fr-FR", { timeZone: TZ, weekday: court ? "short" : "long", day: "numeric", month: court ? "short" : "long", hour: "2-digit", minute: "2-digit" }).replace(/^./, (l) => l.toUpperCase());
+}
+const estInscrit = (e) => Boolean(MOI && (e.inscrits || []).some((i) => i.id === MOI.id));
+
+function avatars(inscrits, max = 5) {
+  const l = inscrits || [];
+  if (!l.length) return "";
+  return `<span class="avatars" title="${esc(l.map((i) => i.nom).join(", "))}">${l.slice(0, max).map((i) =>
+    `<img src="${esc(i.avatar)}" alt="" loading="lazy">`).join("")}${l.length > max ? `<b>+${l.length - max}</b>` : ""}</span>`;
+}
+
+// Bouton d'inscription (events et tournois)
+function boutonInscription(e, classe = "btn-ev", texte = "Je participe") {
+  if (new Date(e.date) <= new Date()) return "";
+  const n = (e.inscrits || []).length;
+  if (estInscrit(e)) return `<button type="button" class="btn ${classe} inscrit" data-participer="${esc(e.id)}" title="Clique pour te désinscrire">Inscrit ✓</button>`;
+  if (e.places && n >= e.places) return `<button type="button" class="btn btn-ghost" disabled>Complet</button>`;
+  return `<button type="button" class="btn ${classe}" data-participer="${esc(e.id)}">${texte}</button>`;
+}
+async function participer(id) {
+  const r = await fetch("/api/participer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.erreur || "erreur");
+  return d;
+}
+// Clic sur un bouton d'inscription : met à jour la liste et relance l'affichage
+function brancherInscriptions(racine, rendre) {
+  racine.addEventListener("click", async (ev) => {
+    const b = ev.target.closest("[data-participer]");
+    if (!b) return;
+    b.disabled = true;
+    try {
+      const d = await participer(b.dataset.participer);
+      const e = [...NOCTIS.events, ...NOCTIS.tournois].find((x) => x.id === b.dataset.participer);
+      if (e) e.inscrits = d.inscrits;
+      rendre();
+    } catch (err) {
+      b.disabled = false;
+      alert(err.message === "complet" ? "Désolé, c'est complet." : "L'inscription n'a pas marché, réessaie dans un instant.");
+    }
+  });
+}
+
+// Décompte générique : chaque carte a data-debut et un bloc .zone-decompte
+function majDecomptes(racine, classeDecompte, messageLive) {
+  racine.querySelectorAll("[data-debut]").forEach((li) => {
+    let s = Math.floor((new Date(li.dataset.debut) - Date.now()) / 1000);
+    const badge = li.querySelector(".quand-rel"), zone = li.querySelector(".zone-decompte");
+    if (s <= 0) {
+      if (!badge.classList.contains("live")) { badge.className = "quand-rel live"; badge.textContent = "En cours"; zone.innerHTML = `<p class="live-msg">${messageLive}</p>`; }
+      return;
+    }
+    badge.textContent = relatif(new Date(li.dataset.debut));
+    if (!zone.firstElementChild) zone.innerHTML = `<div class="${classeDecompte}" role="timer"><div><b></b><span>j</span></div><div><b></b><span>h</span></div><div><b></b><span>min</span></div><div><b></b><span>sec</span></div></div>`;
+    const b = zone.querySelectorAll("b"), j = Math.floor(s / 86400); s %= 86400;
+    const h = Math.floor(s / 3600); s %= 3600;
+    b[0].textContent = pad(j); b[1].textContent = pad(h); b[2].textContent = pad(Math.floor(s / 60)); b[3].textContent = pad(s % 60);
+  });
 }

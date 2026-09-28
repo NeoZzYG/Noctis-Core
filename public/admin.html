@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Espace admin · Noctis Core</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/assets/logo-mini.png" alt="" onerror="this.remove()">NOCTIS CORE</a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="/" >Accueil</a>
+      <a href="/tournois.html">Tournois</a>
+      <a href="/classement.html" >Classement</a>
+      <a href="/boutique.html">Boutique</a>
+    </nav>
+    <div id="compte"></div>
+  </div>
+</header>
+<nav class="nav-mobile" aria-label="Navigation mobile">
+  <a href="/" >Accueil</a>
+  <a href="/tournois.html">Tournois</a>
+  <a href="/classement.html" >Classement</a>
+  <a href="/boutique.html">Boutique</a>
+</nav>
+<main>
+<section class="page-tete page-tete-admin">
+  <h1>Espace admin</h1>
+  <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
+  <p class="devise">Gère le site sans toucher au code</p>
+</section>
+
+<section class="bloc admin" id="admin">
+  <div class="wrap">
+    <p class="events-vide" id="admin-chargement">Chargement…</p>
+  </div>
+</section>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <span>© 2026 Noctis Core [NcG]</span>
+    <nav aria-label="Réseaux">
+      <a data-discord href="#">Discord</a>
+      <a data-twitch href="#">Twitch</a>
+    </nav>
+  </div>
+</footer>
+<script src="/app.js"></script>
+<script>
+  const racine = document.querySelector("#admin .wrap");
+  const JEUX_CONNUS = THEMES_JEUX.map((t) => t.nom);
+  const JEUX_TOURNOIS = NOCTIS.jeuxTournois || ["League of Legends", "Call of Duty", "Valorant"];
+
+  const SCHEMA = {
+    events: { label: "Events", aide: "Les soirées du mois (Soirée LoL, Soirée CoD…). Elles s'affichent sur l'accueil avec leur décompte, et les membres s'inscrivent en un clic.",
+      nouveau: () => ({ titre: "Soirée ", jeu: "", ambiance: "chill", date: "", places: null, description: "", image: "" }), apercu: (e) => `${e.titre || "Nouvel event"}${e.ambiance === "competitif" ? " · Compétitif" : " · Chill"}`,
+      champs: [{ k: "titre", l: "Titre", t: "text", ph: "Soirée Among Us" }, { k: "jeu", l: "Jeu", t: "jeu" },
+        { k: "ambiance", l: "Ambiance", t: "select", options: [["chill", "☾ Chill"], ["competitif", "⚔ Compétitif"]] }, { k: "date", l: "Date et heure", t: "datetime" },
+        { k: "places", l: "Places max", t: "number", ph: "Vide = illimité" }, { k: "description", l: "Description", t: "textarea", large: 1 }, { k: "image", l: "Image de couverture (optionnel)", t: "image" }] },
+    tournois: { label: "Tournois", aide: "Les tournois officiels, affichés sur la page Tournois avec le décompte et la jauge d'inscrits.",
+      nouveau: () => ({ titre: "Tournoi ", jeu: JEUX_TOURNOIS[0] || "", date: "", format: "", places: 16, recompense: "", description: "", image: "" }), apercu: (e) => e.titre || "Nouveau tournoi",
+      champs: [{ k: "titre", l: "Titre", t: "text", ph: "Noctis Cup #1" }, { k: "jeu", l: "Jeu", t: "select", options: () => JEUX_TOURNOIS.map((j) => [j, j]) }, { k: "date", l: "Date et heure", t: "datetime" },
+        { k: "format", l: "Format", t: "text", ph: "5v5 · élimination directe" }, { k: "places", l: "Places max", t: "number", ph: "Vide = illimité" },
+        { k: "recompense", l: "Récompense", t: "text", ph: "Rôle Champion + 20 € de RP" }, { k: "description", l: "Description", t: "textarea", large: 1 }, { k: "image", l: "Image de couverture (optionnel)", t: "image" }] },
+    jeux: { label: "Jeux", aide: "Les jeux de la commu, affichés sur l'accueil. Leur couleur et leur sigle sont repris sur les events et tournois du même jeu.",
+      nouveau: () => ({ nom: "", sigle: "", couleur: "#c69428", detail: "", image: "" }), apercu: (j) => j.nom || "Nouveau jeu",
+      champs: [{ k: "nom", l: "Nom du jeu", t: "text", ph: "League of Legends" }, { k: "sigle", l: "Sigle (5 lettres max)", t: "text", ph: "LoL" },
+        { k: "couleur", l: "Couleur", t: "color" }, { k: "detail", l: "Petite description", t: "text", ph: "Customs et Flex tous les soirs", large: 1 }, { k: "image", l: "Visuel (format portrait)", t: "image" }] },
+    staff: { label: "Staff", aide: "Les membres du staff mis en avant dans « La team » sur l'accueil.",
+      nouveau: () => ({ nom: "", role: "", couleur: "#c69428", avatar: "" }), apercu: (s) => s.nom ? `${s.nom} · ${s.role}` : "Nouveau membre",
+      champs: [{ k: "nom", l: "Pseudo", t: "text" }, { k: "role", l: "Rôle", t: "text", ph: "Modérateur" }, { k: "couleur", l: "Couleur du rôle", t: "color" }, { k: "avatar", l: "Photo (carrée)", t: "image" }] },
+    produits: { label: "Boutique", aide: "Les articles de la boutique. Pour vendre, colle le lien de paiement Stripe (Payment Link) du produit.",
+      nouveau: () => ({ nom: "", prix: 0, image: "", lien: "", membres: false }), apercu: (p) => p.nom || "Nouveau produit",
+      champs: [{ k: "nom", l: "Nom", t: "text", ph: "Hoodie Noctis" }, { k: "prix", l: "Prix (€)", t: "number" }, { k: "lien", l: "Lien de paiement (vide = « Bientôt »)", t: "text", ph: "https://buy.stripe.com/…", large: 1 },
+        { k: "membres", l: "Réservé aux membres du serveur", t: "checkbox" }, { k: "image", l: "Photo du produit (carrée)", t: "image" }] },
+    palmares: { label: "Palmarès", aide: "Ajoute une ligne à la fin de chaque tournoi. Le nombre de tournois sur l'accueil se calcule tout seul.",
+      nouveau: () => ({ tournoi: "", jeu: JEUX_TOURNOIS[0] || "", date: new Date().toISOString().slice(0, 10), vainqueur: "", finaliste: "", participants: null }), apercu: (p) => p.tournoi ? `${p.tournoi} · 🏆 ${p.vainqueur || "?"}` : "Nouveau résultat",
+      champs: [{ k: "tournoi", l: "Tournoi", t: "text" }, { k: "jeu", l: "Jeu", t: "select", options: () => JEUX_TOURNOIS.map((j) => [j, j]) }, { k: "date", l: "Date", t: "date" },
+        { k: "vainqueur", l: "Vainqueur", t: "text" }, { k: "finaliste", l: "Finaliste", t: "text" }, { k: "participants", l: "Nombre de joueurs", t: "number" }] },
+    reglement: { label: "Règlement", aide: "Les règles affichées en bas de la page Tournois, une par ligne.",
+      nouveau: () => ({ texte: "" }), apercu: (r, i) => `Règle ${i + 1}`, champs: [{ k: "texte", l: "Règle", t: "textarea", large: 1 }] },
+  };
+
+  let etat = {}, onglet = "events", modifie = false, majInfo = "";
+  const id = () => Math.random().toString(36).slice(2, 10);
+  const versLocal = (iso) => { if (!iso) return ""; const d = new Date(iso); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
+  const versISO = (v) => (v ? new Date(v).toISOString() : "");
+
+  function champ(c, v, i) {
+    const attr = `data-i="${i}" data-k="${c.k}"`;
+    const lab = `<span class="lab">${esc(c.l)}</span>`;
+    const cls = `champ${c.large ? " large" : ""}`;
+    switch (c.t) {
+      case "textarea": return `<label class="${cls}">${lab}<textarea ${attr} rows="3">${esc(v || "")}</textarea></label>`;
+      case "number": return `<label class="${cls}">${lab}<input type="number" min="0" step="any" ${attr} value="${v == null ? "" : esc(v)}" placeholder="${esc(c.ph || "")}"></label>`;
+      case "datetime": return `<label class="${cls}">${lab}<input type="datetime-local" ${attr} value="${versLocal(v)}"></label>`;
+      case "date": return `<label class="${cls}">${lab}<input type="date" ${attr} value="${esc(v || "")}"></label>`;
+      case "color": return `<label class="${cls}">${lab}<span class="couleur"><input type="color" ${attr} value="${esc(v || "#c69428")}"><code>${esc(v || "#c69428")}</code></span></label>`;
+      case "select": {
+        const opts = typeof c.options === "function" ? c.options() : c.options;
+        const liste = v && !opts.some(([val]) => val === v) ? [[v, v], ...opts] : opts; // garde une ancienne valeur
+        return `<label class="${cls}">${lab}<select ${attr}>${liste.map(([val, txt]) => `<option value="${esc(val)}"${val === (v || opts[0][0]) ? " selected" : ""}>${esc(txt)}</option>`).join("")}</select></label>`;
+      }
+      case "checkbox": return `<label class="${cls} case"><input type="checkbox" ${attr}${v ? " checked" : ""}>${esc(c.l)}</label>`;
+      case "jeu": return `<label class="${cls}">${lab}<input type="text" list="liste-jeux" ${attr} value="${esc(v || "")}" placeholder="Choisis ou tape un jeu"></label>`;
+      case "image": return `<div class="${cls} large champ-image">${lab}<div class="img-ligne">
+          <div class="img-apercu">${v ? `<img src="${esc(v)}" alt="">` : "<span>Aucune image</span>"}</div>
+          <div class="img-boutons"><label class="btn btn-ghost">${v ? "Changer" : "Choisir une image"}<input type="file" accept="image/*" data-img data-i="${i}" data-k="${c.k}" hidden></label>
+          ${v ? `<button type="button" class="btn btn-ghost" data-act="retirer" data-i="${i}" data-k="${c.k}">Retirer</button>` : ""}</div></div></div>`;
+      default: return `<label class="${cls}">${lab}<input type="text" ${attr} value="${esc(v || "")}" placeholder="${esc(c.ph || "")}"></label>`;
+    }
+  }
+
+  function carte(item, i, total) {
+    const s = SCHEMA[onglet];
+    const insc = item.inscrits && item.inscrits.length
+      ? `<p class="insc-admin"><b>${item.inscrits.length} inscrit${item.inscrits.length > 1 ? "s" : ""}</b> : ${item.inscrits.map((x) => esc(x.nom)).join(", ")}</p>` : "";
+    return `<article class="carte-admin">
+      <header><strong data-apercu="${i}">${esc(s.apercu(item, i))}</strong>
+        <span class="outils">
+          <button type="button" data-act="haut" data-i="${i}" ${i === 0 ? "disabled" : ""} aria-label="Monter">↑</button>
+          <button type="button" data-act="bas" data-i="${i}" ${i === total - 1 ? "disabled" : ""} aria-label="Descendre">↓</button>
+          <button type="button" data-act="suppr" data-i="${i}" class="suppr">Supprimer</button>
+        </span></header>
+      <div class="champs">${s.champs.map((c) => champ(c, item[c.k], i)).join("")}</div>${insc}
+    </article>`;
+  }
+
+  function rendre() {
+    const s = SCHEMA[onglet], liste = etat[onglet];
+    const noms = [...new Set([...(etat.jeux || []).map((j) => j.nom).filter(Boolean), ...JEUX_CONNUS])];
+    racine.innerHTML = `
+      <nav class="onglets" aria-label="Sections">${Object.entries(SCHEMA).map(([k, v]) =>
+        `<button type="button" data-onglet="${k}"${k === onglet ? ' aria-current="true"' : ""}>${v.label}<small>${etat[k].length}</small></button>`).join("")}</nav>
+      <div class="entete-onglet"><p>${esc(s.aide)}</p><button type="button" class="btn btn-or" data-act="ajouter">+ Ajouter</button></div>
+      <div class="cartes-admin">${liste.length ? liste.map((it, i) => carte(it, i, liste.length)).join("") : '<p class="events-vide">Rien pour l\'instant. Clique sur « + Ajouter ».</p>'}</div>
+      <datalist id="liste-jeux">${noms.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>
+      <div class="barre-enregistrer${modifie ? " visible" : ""}">
+        <span id="statut">${modifie ? "Modifications non enregistrées" : esc(majInfo)}</span>
+        <button type="button" class="btn btn-or" data-act="enregistrer"${modifie ? "" : " disabled"}>Enregistrer</button>
+      </div>`;
+  }
+
+  function marquer() {
+    if (modifie) return;
+    modifie = true;
+    const barre = racine.querySelector(".barre-enregistrer");
+    barre.classList.add("visible");
+    barre.querySelector("#statut").textContent = "Modifications non enregistrées";
+    barre.querySelector("button").disabled = false;
+  }
+
+  // Saisie dans les champs
+  const saisie = (ev) => {
+    const el = ev.target, i = el.dataset.i, k = el.dataset.k;
+    if (i == null || !k || el.dataset.img != null) return;
+    const c = SCHEMA[onglet].champs.find((x) => x.k === k);
+    let v = el.type === "checkbox" ? el.checked : el.value;
+    if (c.t === "number") v = el.value === "" ? null : Number(el.value);
+    if (c.t === "datetime") v = versISO(el.value);
+    etat[onglet][i][k] = v;
+    if (c.t === "color") el.nextElementSibling.textContent = el.value;
+    const ap = racine.querySelector(`[data-apercu="${i}"]`);
+    if (ap) ap.textContent = SCHEMA[onglet].apercu(etat[onglet][i], Number(i));
+    marquer();
+  };
+  racine.addEventListener("input", saisie);
+  racine.addEventListener("change", (ev) => { if (ev.target.tagName === "SELECT") saisie(ev); });
+
+  // Envoi d'image : redimensionnée dans le navigateur avant l'envoi
+  racine.addEventListener("change", async (ev) => {
+    const el = ev.target;
+    if (el.dataset.img == null || !el.files[0]) return;
+    const zone = el.closest(".champ-image");
+    zone.querySelector(".img-apercu").innerHTML = "<span>Envoi…</span>";
+    try {
+      const url = await envoyerImage(el.files[0]);
+      etat[onglet][el.dataset.i][el.dataset.k] = url;
+      modifie = true; rendre();
+    } catch (e) {
+      alert("L'image n'a pas pu être envoyée. Essaie avec une image plus légère (JPG ou PNG).");
+      rendre();
+    }
+  });
+
+  async function envoyerImage(fichier) {
+    const img = await new Promise((ok, ko) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ko; i.src = URL.createObjectURL(fichier); });
+    const max = 1400, r = Math.min(1, max / Math.max(img.width, img.height));
+    const cv = document.createElement("canvas");
+    cv.width = Math.round(img.width * r); cv.height = Math.round(img.height * r);
+    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+    let data = cv.toDataURL("image/webp", 0.86), type = "image/webp";
+    if (!data.startsWith("data:image/webp")) { type = fichier.type === "image/png" ? "image/png" : "image/jpeg"; data = cv.toDataURL(type, 0.86); }
+    const res = await fetch("/api/admin-image", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, data: data.split(",")[1] }) });
+    if (!res.ok) throw new Error("envoi");
+    return (await res.json()).url;
+  }
+
+  // Boutons
+  racine.addEventListener("click", async (ev) => {
+    const b = ev.target.closest("button");
+    if (!b) return;
+    if (b.dataset.onglet) { onglet = b.dataset.onglet; rendre(); return; }
+    const liste = etat[onglet], i = Number(b.dataset.i);
+    switch (b.dataset.act) {
+      case "ajouter": liste.unshift({ id: id(), ...SCHEMA[onglet].nouveau() }); modifie = true; rendre(); racine.querySelector(".carte-admin input, .carte-admin textarea")?.focus(); break;
+      case "suppr":
+        if (liste[i].inscrits && liste[i].inscrits.length && !confirm(`${liste[i].inscrits.length} membre(s) sont inscrits. Supprimer quand même ?`)) return;
+        if (!liste[i].inscrits?.length && !confirm("Supprimer cet élément ?")) return;
+        liste.splice(i, 1); modifie = true; rendre(); break;
+      case "haut": [liste[i - 1], liste[i]] = [liste[i], liste[i - 1]]; modifie = true; rendre(); break;
+      case "bas": [liste[i + 1], liste[i]] = [liste[i], liste[i + 1]]; modifie = true; rendre(); break;
+      case "retirer": liste[i][b.dataset.k] = ""; modifie = true; rendre(); break;
+      case "enregistrer": await enregistrer(b); break;
+    }
+  });
+
+  async function enregistrer(b) {
+    b.disabled = true; b.textContent = "Enregistrement…";
+    const contenu = { ...etat, reglement: etat.reglement.map((r) => r.texte).filter((t) => t.trim()) };
+    try {
+      const r = await fetch("/api/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contenu }) });
+      if (!r.ok) throw new Error(r.status === 403 ? "admin" : "erreur");
+      charger((await r.json()).contenu);
+      modifie = false;
+      majInfo = "✓ Enregistré, c'est en ligne";
+      rendre();
+    } catch (e) {
+      b.disabled = false; b.textContent = "Enregistrer";
+      alert(e.message === "admin" ? "Tu n'as plus les droits admin." : "L'enregistrement n'a pas marché. Réessaie dans un instant.");
+    }
+  }
+
+  function charger(src) {
+    const avecId = (l) => (l || []).map((x) => ({ id: x.id || id(), ...x }));
+    etat = {
+      events: avecId(src.events), tournois: avecId(src.tournois), jeux: avecId(src.jeux), staff: avecId(src.staff),
+      produits: avecId(src.produits), palmares: avecId(src.palmares), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
+    };
+    if (src.majLe) majInfo = `Dernière mise à jour le ${new Date(src.majLe).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}${src.majPar ? ` par ${src.majPar}` : ""}`;
+  }
+
+  addEventListener("beforeunload", (e) => { if (modifie) { e.preventDefault(); e.returnValue = ""; } });
+
+  Promise.all([initCompte(), chargerContenu()]).then(async () => {
+    if (!ADMIN) {
+      racine.innerHTML = '<div class="vide" style="margin:0 auto;text-align:center"><h1>Accès réservé</h1><p>Cette page est réservée aux admins du serveur Noctis Core.</p><a class="btn btn-ghost" href="/">Retour à l\'accueil</a></div>';
+      return;
+    }
+    // On part du contenu enregistré, ou à défaut des valeurs actuelles du site
+    let enregistre = null;
+    try { enregistre = (await (await fetch("/api/contenu")).json()).contenu; } catch {}
+    charger(enregistre || NOCTIS);
+    rendre();
+  });
+</script>
+</body></html>

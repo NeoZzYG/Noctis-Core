@@ -58,7 +58,7 @@
 </footer>
 <script src="/app.js"></script>
 <script>
-  initCompte().then((u) => {
+  Promise.all([initCompte(), chargerContenu()]).then(([u]) => {
     const c = document.getElementById("contenu");
     if (!u) {
       c.innerHTML = `<div class="vide"><h1>Connecte-toi</h1><p>Ton profil Noctis se crée automatiquement à ta première connexion avec Discord.</p>${boutonConnexion()}</div>`;
@@ -78,7 +78,7 @@
       <dl class="infos">
         <div><dt>Membre depuis</dt><dd>${depuis}</dd></div>
         <div><dt>Rôles sur le serveur</dt><dd>${u.roles.length}</dd></div>
-        <div><dt>Tournois joués</dt><dd>0</dd></div>
+        <div><dt>Tournois joués</dt><dd>${NOCTIS.tournois.filter((t) => new Date(t.date) < new Date() && (t.inscrits || []).some((i) => i.id === u.id)).length}</dd></div>
       </dl>` : `
       <div class="bandeau-rejoindre"><div><h2>Rejoins le serveur</h2><p class="pseudo">Une fois sur le Discord, déconnecte-toi puis reconnecte-toi pour activer ton profil membre.</p></div><a class="btn btn-discord" href="${NOCTIS.discordInvite}">Rejoindre le Discord</a></div>`}
       <p style="margin:2.5rem 0"><a class="btn btn-ghost" href="/api/logout">Se déconnecter</a></p>`;

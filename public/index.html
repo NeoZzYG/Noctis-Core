@@ -123,123 +123,86 @@
 </footer>
 <script src="/app.js"></script>
 <script>
-  // Jeux
-  document.getElementById("jeux").innerHTML = NOCTIS.jeux.map((j) => `<li class="jeu${j.image ? "" : " sans-image"}">
-      ${j.image ? `<img src="${esc(j.image)}" alt="" loading="lazy">` : `<span class="lettre" aria-hidden="true">${esc(j.nom.charAt(0))}</span>`}
-      <strong>${esc(j.nom)}</strong><span>${esc(j.detail)}</span></li>`).join("");
-
-  // La team
+  const eur = (n) => Number(n).toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
   const fmt = (n) => Number(n).toLocaleString("fr-FR");
-  document.getElementById("c-jeux").textContent = NOCTIS.jeux.length;
-  document.getElementById("c-tournois").textContent = (NOCTIS.palmares || []).length;
-  document.getElementById("staff").innerHTML = NOCTIS.staff.map((m) => `<li>
-      <div class="av">${m.avatar ? `<img src="${esc(m.avatar)}" alt="">` : `<span>${esc(m.nom.charAt(0))}</span>`}</div>
-      <strong>${esc(m.nom)}</strong><em style="color:${esc(m.couleur)}">${esc(m.role)}</em></li>`).join("");
-  const code = (NOCTIS.discordInvite.split("/").pop() || "").trim();
-  if (code && code !== "TON-INVITE") {
-    fetch(`https://discord.com/api/v10/invites/${code}?with_counts=true`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => {
-        if (!d) return;
-        document.getElementById("c-membres").textContent = fmt(d.approximate_member_count);
-        document.getElementById("c-enligne").textContent = fmt(d.approximate_presence_count);
-        document.getElementById("nb-en-ligne").textContent = fmt(d.approximate_presence_count);
-        document.getElementById("en-ligne").hidden = false;
-      }).catch(() => {});
-  }
-
-  // Vitrine boutique (3 premiers produits)
-  document.getElementById("vitrine").innerHTML = NOCTIS.produits.slice(0, 3).map((p) => `<li><a href="/boutique.html">
-      <div class="visuel"><img src="${esc(p.image)}" alt="${esc(p.nom)}" loading="lazy" onerror="this.src='/assets/logo.png';this.className='fallback'"></div>
-      <div class="ligne"><strong>${esc(p.nom)}</strong><span class="prix">${Number(p.prix).toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</span></div>
-      ${p.membres ? '<span class="reserve">Réservé aux membres</span>' : ""}</a></li>`).join("");
-
-  // Compte / boutons
   afficherErreur();
   document.getElementById("cta-final").insertAdjacentHTML("afterbegin", DISCORD_SVG);
-  initCompte().then((user) => {
-    document.getElementById("hero-actions").insertAdjacentHTML("afterbegin", user
-      ? '<a class="btn btn-or btn-lg" href="/tournois.html">Voir les tournois</a>'
-      : `<a class="btn btn-or btn-lg" href="/api/auth-login">${DISCORD_SVG}Se connecter avec Discord</a>`);
-  });
 
   // Header transparent -> opaque au scroll
   const entete = document.querySelector(".entete");
   addEventListener("scroll", () => entete.classList.toggle("defile", scrollY > 40), { passive: true });
 
-  // Events du mois (créés dans Discord, lus par /api/events)
+  // Membres et en ligne (en direct depuis Discord)
+  const code = (NOCTIS.discordInvite.split("/").pop() || "").trim();
+  if (code) fetch(`https://discord.com/api/v10/invites/${code}?with_counts=true`)
+    .then((r) => r.ok ? r.json() : null)
+    .then((d) => {
+      if (!d) return;
+      document.getElementById("c-membres").textContent = fmt(d.approximate_member_count);
+      document.getElementById("c-enligne").textContent = fmt(d.approximate_presence_count);
+      document.getElementById("nb-en-ligne").textContent = fmt(d.approximate_presence_count);
+      document.getElementById("en-ligne").hidden = false;
+    }).catch(() => {});
+
+  // Events du mois (créés depuis l'espace admin)
   const listeEv = document.getElementById("events");
-  const TZ = "Europe/Paris";
-  const pad = (n) => String(n).padStart(2, "0");
-  const jourParis = (d) => d.toLocaleDateString("fr-CA", { timeZone: TZ }); // AAAA-MM-JJ
-  function relatif(debut) {
-    const auj = new Date(jourParis(new Date())), j = new Date(jourParis(debut));
-    const diff = Math.round((j - auj) / 86400000);
-    if (diff === 0) return parseInt(debut.toLocaleString("fr-FR", { timeZone: TZ, hour: "2-digit", hourCycle: "h23" }), 10) >= 18 ? "Ce soir" : "Aujourd'hui";
-    if (diff === 1) return "Demain";
-    return `Dans ${diff} jours`;
-  }
   function carteEv(e) {
-    const t = themeJeu(e.nom), debut = new Date(e.debut);
-    const date = debut.toLocaleString("fr-FR", { timeZone: TZ, weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).replace(/^./, (l) => l.toUpperCase());
-    return `<li class="ev" style="--c:${t.couleur}" data-debut="${esc(e.debut)}" data-encours="${e.enCours ? 1 : 0}">
+    const t = themeJeu(e.jeu || e.titre), n = (e.inscrits || []).length;
+    const image = e.image || t.image;
+    return `<li class="ev" style="--c:${t.couleur}" data-debut="${esc(e.date)}">
       <div class="haut">
-        ${e.image ? `<img src="${esc(e.image)}" alt="" loading="lazy">` : ""}
+        ${image ? `<img src="${esc(image)}" alt="" loading="lazy">` : ""}
         <span class="sigle" aria-hidden="true">${esc(t.sigle)}</span>
         <span class="tag">${esc(t.nom)}</span>
+        <span class="ambiance ${e.ambiance === "competitif" ? "competitif" : "chill"}">${e.ambiance === "competitif" ? "⚔ Compétitif" : "☾ Chill"}</span>
         <span class="quand-rel"></span>
       </div>
       <div class="corps">
-        <h3>${esc(e.nom)}</h3>
-        <p class="date">${date}</p>
-        ${e.description ? `<p class="desc">${esc(e.description.replace(/[*_~`>|]/g, "").trim())}</p>` : ""}
+        <h3>${esc(e.titre)}</h3>
+        <p class="date">${dateLongue(e.date, true)}</p>
+        ${e.description ? `<p class="desc">${esc(e.description)}</p>` : ""}
         <div class="zone-decompte"></div>
         <div class="pied-ev">
-          <span class="interesses">${e.interesses ? `${e.interesses} partant${e.interesses > 1 ? "s" : ""}` : "Sois le 1er"}</span>
-          <a class="btn btn-ev" href="${esc(e.lien)}" target="_blank" rel="noopener">Je participe</a>
+          <span class="interesses">${avatars(e.inscrits, 3)}${n ? `${n}${e.places ? `/${e.places}` : ""} partant${n > 1 ? "s" : ""}` : "Sois le 1er"}</span>
+          ${boutonInscription(e)}
         </div>
       </div>
     </li>`;
   }
-  function majDecomptes() {
-    let fini = false;
-    listeEv.querySelectorAll(".ev").forEach((li) => {
-      const debut = new Date(li.dataset.debut);
-      let s = Math.floor((debut - Date.now()) / 1000);
-      const badge = li.querySelector(".quand-rel"), zone = li.querySelector(".zone-decompte");
-      if (li.dataset.encours === "1" || s <= 0) {
-        if (!badge.classList.contains("live")) {
-          badge.className = "quand-rel live"; badge.textContent = "En cours";
-          zone.innerHTML = '<p class="live-msg">En direct sur le vocal</p>';
-          if (li.dataset.encours !== "1") fini = true;
-        }
-        return;
-      }
-      badge.textContent = relatif(debut);
-      const j = Math.floor(s / 86400); s %= 86400;
-      const h = Math.floor(s / 3600); s %= 3600;
-      const m = Math.floor(s / 60);
-      if (!zone.firstElementChild) zone.innerHTML = '<div class="mini-decompte" role="timer"><div><b></b><span>j</span></div><div><b></b><span>h</span></div><div><b></b><span>min</span></div><div><b></b><span>sec</span></div></div>';
-      const b = zone.querySelectorAll("b");
-      b[0].textContent = pad(j); b[1].textContent = pad(h); b[2].textContent = pad(m); b[3].textContent = pad(s % 60);
-    });
-    if (fini) setTimeout(chargerEvents, 90000); // on revérifie le statut Discord peu après le début
+  function rendreEvents() {
+    const liste = aVenir(NOCTIS.events).slice(0, 8);
+    listeEv.innerHTML = liste.length ? liste.map(carteEv).join("")
+      : '<li class="events-vide">Aucun event prévu pour le moment. Les prochains seront annoncés ici et sur le Discord.</li>';
+    majDecomptes(listeEv, "mini-decompte", "En direct sur le vocal");
   }
-  async function chargerEvents() {
-    try {
-      const r = await fetch("/api/events");
-      const { events } = await r.json();
-      listeEv.innerHTML = events && events.length
-        ? events.slice(0, 8).map(carteEv).join("")
-        : '<li class="events-vide">Aucun event prévu pour le moment. Les prochains seront annoncés sur le Discord.</li>';
-      majDecomptes();
-    } catch {
-      listeEv.innerHTML = '<li class="events-vide">Les events n\'ont pas pu être chargés. Ils sont toujours visibles sur le Discord.</li>';
-    }
-  }
-  chargerEvents();
-  setInterval(majDecomptes, 1000);
-  setInterval(chargerEvents, 5 * 60 * 1000); // nouveaux events créés sur Discord
+  brancherInscriptions(listeEv, rendreEvents);
+  setInterval(() => majDecomptes(listeEv, "mini-decompte", "En direct sur le vocal"), 1000);
+
+  Promise.all([initCompte(), chargerContenu()]).then(([user]) => {
+    document.getElementById("hero-actions").insertAdjacentHTML("afterbegin", user
+      ? '<a class="btn btn-or btn-lg" href="/tournois.html">Voir les tournois</a>'
+      : `<a class="btn btn-or btn-lg" href="/api/auth-login">${DISCORD_SVG}Se connecter avec Discord</a>`);
+
+    rendreEvents();
+
+    // Jeux
+    document.getElementById("jeux").innerHTML = NOCTIS.jeux.map((j) => `<li class="jeu${j.image ? "" : " sans-image"}" style="--c:${esc(j.couleur || "#c69428")}">
+      ${j.image ? `<img src="${esc(j.image)}" alt="" loading="lazy">` : `<span class="lettre" aria-hidden="true">${esc((j.sigle || j.nom).charAt(0))}</span>`}
+      <strong>${esc(j.nom)}</strong><span>${esc(j.detail || "")}</span></li>`).join("");
+
+    // La team
+    document.getElementById("c-jeux").textContent = NOCTIS.jeux.length;
+    document.getElementById("c-tournois").textContent = (NOCTIS.palmares || []).length;
+    document.getElementById("staff").innerHTML = NOCTIS.staff.map((m) => `<li>
+      <div class="av">${m.avatar ? `<img src="${esc(m.avatar)}" alt="">` : `<span>${esc(m.nom.charAt(0))}</span>`}</div>
+      <strong>${esc(m.nom)}</strong><em style="color:${esc(m.couleur)}">${esc(m.role)}</em></li>`).join("");
+
+    // Vitrine boutique (3 premiers produits)
+    document.getElementById("vitrine").innerHTML = NOCTIS.produits.slice(0, 3).map((p) => `<li><a href="/boutique.html">
+      <div class="visuel"><img src="${esc(p.image || "/assets/logo.png")}" alt="${esc(p.nom)}" loading="lazy" onerror="this.src='/assets/logo.png';this.className='fallback'"></div>
+      <div class="ligne"><strong>${esc(p.nom)}</strong><span class="prix">${eur(p.prix)}</span></div>
+      ${p.membres ? '<span class="reserve">Réservé aux membres</span>' : ""}</a></li>`).join("");
+  });
 
   // Braises tricolores
   const cv = document.getElementById("braises"), ctx = cv.getContext("2d");

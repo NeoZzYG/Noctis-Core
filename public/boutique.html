@@ -66,7 +66,7 @@
 
 <script>
   const eur = (n) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
-  initCompte().then((u) => {
+  Promise.all([initCompte(), chargerContenu()]).then(([u]) => {
     const membre = u && u.isMember;
     document.getElementById("produits").innerHTML = NOCTIS.produits.map((p) => {
       let action, note = "";
@@ -80,7 +80,7 @@
         if (p.membres) note = "Réservé aux membres";
       }
       return `<li class="produit">
-        <div class="visuel"><img src="${esc(p.image)}" alt="${esc(p.nom)}" onerror="this.outerHTML='<span class=sans-image>NC</span>'"></div>
+        <div class="visuel"><img src="${esc(p.image || "/assets/logo.png")}" alt="${esc(p.nom)}" onerror="this.outerHTML='<span class=sans-image>NC</span>'"></div>
         <h2>${esc(p.nom)}</h2>
         <div class="ligne"><span class="prix">${eur(p.prix)}</span>${action}</div>
         ${note ? `<p class="note">${note}</p>` : ""}

@@ -15,7 +15,7 @@ Copie `LOGO_NOCTIS.png` dans `public/assets/` et renomme-le `logo.png`.
 En haut du fichier : lien d'invitation Discord, chaîne Twitch, liste des jeux.
 
 ### Bonus accueil
-- Le lien d'invite dans `app.js` suffit pour afficher membres et en ligne en direct
+- Le lien d'invite dans `app.js` affiche membres et en ligne en direct
 
 ### 3. Crée l'appli Discord
 1. Va sur https://discord.com/developers/applications → **New Application** → nomme-la "Noctis Core"
@@ -25,16 +25,11 @@ En haut du fichier : lien d'invitation Discord, chaîne Twitch, liste des jeux.
 4. ID du serveur : dans Discord, Paramètres → Avancés → active le **Mode développeur**,
    puis clic droit sur le serveur Noctis → **Copier l'identifiant du serveur**
 
-### 3 bis. Events automatiques (bot Discord)
-Les events de l'accueil viennent de l'onglet **Événements** de ton serveur : tu crées l'event sur Discord, il apparaît sur le site (mise à jour toutes les 5 min).
+### 3 bis. Bot Discord
+Le bot sert à ajouter les membres au serveur quand ils se connectent, et à reconnaître les admins.
 1. Dans la même appli Discord → onglet **Bot** → **Reset Token** → copie le token
-2. Onglet **OAuth2 → URL Generator** → coche `bot`, puis dans les permissions coche **Create Instant Invite** (nécessaire pour ajouter les membres au serveur à leur connexion) → ouvre l'URL et ajoute le bot au serveur
+2. Onglet **OAuth2 → URL Generator** → coche `bot`, puis la permission **Create Instant Invite** → ouvre l'URL et ajoute le bot au serveur
 3. Ajoute la variable `DISCORD_BOT_TOKEN` dans Netlify
-
-Conseils pour tes events :
-- Mets le nom du jeu dans le titre ("Soirée LoL", "Soirée CoD", "Soirée Among Us") : le site détecte le jeu et prend sa couleur
-- Ajoute une image de couverture à l'event sur Discord : elle s'affiche sur la carte
-- Nouveau jeu pas reconnu ? Ajoute-le dans `THEMES_JEUX` en bas de `app.js`
 
 ### 4. Déploie sur Netlify
 1. Mets le dossier sur GitHub (ou glisse-dépose le dossier dans Netlify → "Deploy manually")
@@ -67,17 +62,17 @@ Quand quelqu'un colle le lien du site sur Discord, une carte s'affiche : nom "No
 - Si tu prends une autre adresse (nom de domaine perso), remplace `https://noctis-core.com` dans le haut de chaque page `.html` (Ctrl+F)
 - Discord garde l'aperçu en cache : si tu modifies les textes, ajoute `?v=2` à la fin du lien pour forcer la mise à jour
 
-## Tournois
-Automatiques aussi : tout event Discord dont le titre contient **Tournoi**, **Cup** ou **Coupe** apparaît sur la page Tournois.
-Dans la description de l'event, ces lignes deviennent des pastilles :
-```
-Format : 5v5 · élimination directe
-Places : 16
-Récompense : rôle Champion Noctis + 20 € de RP
-Le reste de la description s'affiche en texte normal.
-```
-- La jauge d'inscrits se base sur les gens qui cliquent "Intéressé" sur Discord
-- **Palmarès** et **règlement** : à modifier dans `public/app.js` (blocs `palmares` et `reglement`)
+## Espace admin (tout se gère depuis le site)
+Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les admins).
+- **Qui est admin ?** Le propriétaire du serveur Discord, et tous les membres qui ont un rôle avec la permission **Administrateur**. Pour ajouter quelqu'un d'autre sans lui donner ce rôle : variable Netlify `ADMIN_IDS` avec les identifiants Discord séparés par des virgules
+- **Onglets** : Events, Tournois, Jeux, Staff, Boutique, Palmarès, Règlement
+- **Events** : les soirées de la Noctis, avec un badge **☾ Chill** ou **⚔ Compétitif** au choix
+- **Tournois et Palmarès** : seulement les jeux compétitifs (LoL, CoD et Valorant). Pour en ajouter un, modifie `jeuxTournois` en haut de `public/app.js`
+- **Images** : bouton "Choisir une image", elle est redimensionnée et stockée automatiquement
+- Clique sur **Enregistrer** : c'est en ligne tout de suite, sans redéployer
+- Les events et tournois du site sont **indépendants de Discord** : les membres s'inscrivent directement sur le site (bouton "Je participe" / "S'inscrire"), leur avatar apparaît dans la liste des inscrits
+- Les données sont stockées dans **Netlify Blobs** (inclus gratuitement dans Netlify, rien à configurer)
+- Tant que rien n'a été enregistré dans l'admin, le site affiche les valeurs par défaut de `public/app.js`
 
 ## Boutique
 Chaque produit se configure dans `public/app.js` (bloc `produits`).
