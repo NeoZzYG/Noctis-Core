@@ -58,30 +58,141 @@
 </footer>
 <script src="/app.js"></script>
 <script>
-  Promise.all([initCompte(), chargerContenu()]).then(([u]) => {
-    const c = document.getElementById("contenu");
-    if (!u) {
-      c.innerHTML = `<div class="vide"><h1>Connecte-toi</h1><p>Ton profil Noctis se crée automatiquement à ta première connexion avec Discord.</p>${boutonConnexion()}</div>`;
-      return;
-    }
-    const depuis = u.joinedAt ? new Date(u.joinedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—";
+  const c = document.getElementById("contenu");
+  const idVoulu = new URLSearchParams(location.search).get("id") || "";
+  const COULEURS = ["#c69428", "#2146e0", "#d9202e", "#e6e7ec", "#3ba55d", "#1fb6c9"];
+  let P = null, INFO = null;
+
+  const pseudoLigne = (label, v) => v ? `<li><span>${label}</span><b>${esc(v)}</b><button type="button" class="copier" data-copier="${esc(v)}">Copier</button></li>` : "";
+  const reseau = (nom, url) => url ? `<a class="btn btn-ghost" href="${esc(url)}" target="_blank" rel="noopener">${nom}</a>` : "";
+  function statut(vu) {
+    if (!vu) return "";
+    if (Date.now() - new Date(vu) < 5 * 60000) return '<span class="statut-profil en-ligne"><i></i>En ligne sur le site</span>';
+    const d = depuis(vu);
+    return `<span class="statut-profil"><i></i>Vu ${d === "hier" ? "hier" : `il y a ${d}`}</span>`;
+  }
+
+  function vue() {
+    const p = P, coul = p.couleur || "#c69428";
+    const staff = (NOCTIS.staff || []).find((s) => s.membreId === p.id);
+    const depuisLe = p.arrivee ? new Date(p.arrivee).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—";
+    const jeux = (p.jeuxFavoris || []).map((j) => { const t = themeJeu(j); return `<span class="puce-jeu" style="--c:${t.couleur}">${esc(t.nom)}</span>`; }).join("");
+    const pseudos = pseudoLigne("Riot ID", p.pseudos?.riot) + pseudoLigne("Activision ID", p.pseudos?.activision) + pseudoLigne("Autre", p.pseudos?.autre);
+    const reseaux = reseau("Twitch", p.reseaux?.twitch) + reseau("TikTok", p.reseaux?.tiktok) + reseau("YouTube", p.reseaux?.youtube);
+    const outilsAdmin = INFO.admin && !INFO.moi ? `<div class="outils-admin">
+        <span class="lab-admin">Admin</span>
+        <button type="button" class="btn btn-ghost" data-act="editer">Modifier ce profil</button>
+        <button type="button" class="btn btn-ghost" data-act="reinit">Réinitialiser</button>
+        ${INFO.banni ? '<button type="button" class="btn btn-ghost" data-act="debannir">Débannir</button>' : '<button type="button" class="btn btn-danger" data-act="bannir">Bannir du site</button>'}
+      </div>` : "";
     c.innerHTML = `
-      <section class="profil">
-        <img src="${esc(u.avatar)}" alt="Avatar de ${esc(u.name)}">
+      ${INFO.banni ? `<p class="alerte" style="margin-top:2rem">Membre banni du site par ${esc(INFO.banni.par)} le ${new Date(INFO.banni.le).toLocaleDateString("fr-FR")}${INFO.banni.raison ? ` · Raison : ${esc(INFO.banni.raison)}` : ""}</p>` : ""}
+      <section class="profil-tete" style="--acc:${esc(coul)}">
+        <img class="profil-av" src="${esc(p.avatar)}" alt="Avatar de ${esc(p.nom)}">
         <div>
-          <h1>${esc(u.name)}</h1>
-          <p class="pseudo">@${esc(u.username)}</p>
-          ${u.isMember ? '<span class="badge badge-membre">Membre Noctis</span>' : '<span class="badge badge-externe">Pas encore sur le serveur</span>'}
+          <h1>${esc(p.nom)}</h1>
+          <p class="pseudo">@${esc(p.username || "")} ${statut(p.derniereVisite)}</p>
+          <p class="badges"><span class="badge badge-membre">Membre Noctis</span>${staff ? `<span class="badge badge-staff" style="--c:${esc(staff.couleur)}">${esc(staff.role || "Staff")}</span>` : ""}</p>
         </div>
       </section>
-      ${u.isMember ? `
+      ${outilsAdmin}
       <dl class="infos">
-        <div><dt>Membre depuis</dt><dd>${depuis}</dd></div>
-        <div><dt>Rôles sur le serveur</dt><dd>${u.roles.length}</dd></div>
-        <div><dt>Tournois joués</dt><dd>${NOCTIS.tournois.filter((t) => new Date(t.date) < new Date() && (t.inscrits || []).some((i) => i.id === u.id)).length}</dd></div>
-      </dl>` : `
-      <div class="bandeau-rejoindre"><div><h2>Rejoins le serveur</h2><p class="pseudo">Une fois sur le Discord, déconnecte-toi puis reconnecte-toi pour activer ton profil membre.</p></div><a class="btn btn-discord" href="${NOCTIS.discordInvite}">Rejoindre le Discord</a></div>`}
-      <p style="margin:2.5rem 0"><a class="btn btn-ghost" href="/api/logout">Se déconnecter</a></p>`;
+        <div><dt>Membre depuis</dt><dd>${depuisLe}</dd></div>
+        <div><dt>Tournois joués</dt><dd>${p.stats?.tournois || 0}</dd></div>
+        <div><dt>Events rejoints</dt><dd>${p.stats?.events || 0}</dd></div>
+      </dl>
+      <div class="profil-grille" style="--acc:${esc(coul)}">
+        <section class="bloc-profil large"><h2>À propos</h2>${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : `<p class="vide-profil">${INFO.moi ? "Présente-toi en quelques mots : clique sur « Personnaliser mon profil »." : "Pas encore de présentation."}</p>`}</section>
+        <section class="bloc-profil"><h2>Jeux favoris</h2>${jeux ? `<div class="puces-jeux">${jeux}</div>` : '<p class="vide-profil">Aucun jeu choisi.</p>'}</section>
+        <section class="bloc-profil"><h2>Pseudos en jeu</h2>${pseudos ? `<ul class="pseudos">${pseudos}</ul>` : '<p class="vide-profil">Aucun pseudo renseigné.</p>'}</section>
+        ${reseaux ? `<section class="bloc-profil large"><h2>Réseaux</h2><div class="reseaux">${reseaux}</div></section>` : ""}
+      </div>
+      <p class="actions-profil">
+        ${INFO.moi ? '<button type="button" class="btn btn-or" data-act="editer">Personnaliser mon profil</button><a class="btn btn-ghost" href="/api/logout">Se déconnecter</a>' : '<a class="btn btn-ghost" href="/">Retour à l\'accueil</a>'}
+      </p>`;
+  }
+
+  function formulaire() {
+    const p = P, coul = p.couleur || "#c69428";
+    const noms = [...new Set([...(NOCTIS.jeux || []).map((j) => j.nom), ...THEMES_JEUX.map((t) => t.nom)])].filter(Boolean);
+    c.innerHTML = `
+      <section class="profil-tete" style="--acc:${esc(coul)}">
+        <img class="profil-av" src="${esc(p.avatar)}" alt="">
+        <div><h1>${INFO.moi ? "Mon profil" : `Profil de ${esc(p.nom)}`}</h1><p class="pseudo">Le pseudo et la photo viennent de Discord.</p></div>
+      </section>
+      <form class="form-profil" id="form-profil">
+        <label class="champ large"><span class="lab">Présentation <small id="compteur"></small></span>
+          <textarea name="bio" rows="4" maxlength="280" placeholder="Main jungle, toujours chaud pour une soirée CoD…">${esc(p.bio || "")}</textarea></label>
+        <div class="champ large"><span class="lab">Couleur de ton profil</span>
+          <div class="palette">${COULEURS.map((k) => `<button type="button" class="pastille${k === coul ? " choisie" : ""}" data-couleur="${k}" style="--c:${k}" aria-label="Couleur ${k}"></button>`).join("")}
+          <input type="color" name="couleur" value="${esc(coul)}" aria-label="Autre couleur"></div></div>
+        <fieldset class="champ large"><legend class="lab">Jeux favoris (6 max)</legend>
+          <div class="cases-jeux">${noms.map((n) => `<label class="case-jeu" style="--c:${themeJeu(n).couleur}"><input type="checkbox" name="jeux" value="${esc(n)}"${(p.jeuxFavoris || []).includes(n) ? " checked" : ""}><span>${esc(n)}</span></label>`).join("")}</div></fieldset>
+        <label class="champ"><span class="lab">Riot ID (LoL, Valorant)</span><input type="text" name="riot" maxlength="40" placeholder="Pseudo#EUW" value="${esc(p.pseudos?.riot || "")}"></label>
+        <label class="champ"><span class="lab">Activision ID (CoD)</span><input type="text" name="activision" maxlength="40" placeholder="Pseudo#1234567" value="${esc(p.pseudos?.activision || "")}"></label>
+        <label class="champ"><span class="lab">Autre pseudo</span><input type="text" name="autre" maxlength="60" placeholder="Epic, Steam, PSN…" value="${esc(p.pseudos?.autre || "")}"></label>
+        <label class="champ"><span class="lab">Twitch</span><input type="url" name="twitch" placeholder="https://www.twitch.tv/…" value="${esc(p.reseaux?.twitch || "")}"></label>
+        <label class="champ"><span class="lab">TikTok</span><input type="url" name="tiktok" placeholder="https://www.tiktok.com/@…" value="${esc(p.reseaux?.tiktok || "")}"></label>
+        <label class="champ"><span class="lab">YouTube</span><input type="url" name="youtube" placeholder="https://www.youtube.com/@…" value="${esc(p.reseaux?.youtube || "")}"></label>
+        <p class="actions-profil large"><button type="submit" class="btn btn-or">Enregistrer</button><button type="button" class="btn btn-ghost" data-act="annuler">Annuler</button></p>
+      </form>`;
+    const f = document.getElementById("form-profil"), bio = f.bio, cpt = document.getElementById("compteur");
+    const compter = () => (cpt.textContent = `${bio.value.length}/280`); compter(); bio.addEventListener("input", compter);
+    f.addEventListener("change", (e) => {
+      if (e.target.name === "jeux" && f.querySelectorAll("[name=jeux]:checked").length > 6) { e.target.checked = false; alert("6 jeux maximum."); }
+    });
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const profil = {
+        bio: f.bio.value, couleur: f.couleur.value,
+        jeuxFavoris: [...f.querySelectorAll("[name=jeux]:checked")].map((x) => x.value),
+        pseudos: { riot: f.riot.value, activision: f.activision.value, autre: f.autre.value },
+        reseaux: { twitch: f.twitch.value, tiktok: f.tiktok.value, youtube: f.youtube.value },
+      };
+      const b = f.querySelector("[type=submit]"); b.disabled = true; b.textContent = "Enregistrement…";
+      const r = await fetch(`/api/profil?id=${P.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ profil }) });
+      if (!r.ok) { b.disabled = false; b.textContent = "Enregistrer"; alert("L'enregistrement n'a pas marché, réessaie."); return; }
+      await charger();
+    });
+  }
+
+  c.addEventListener("click", async (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.couleur) { document.querySelector("[name=couleur]").value = b.dataset.couleur; document.querySelectorAll(".pastille").forEach((x) => x.classList.toggle("choisie", x === b)); return; }
+    if (b.dataset.copier) { navigator.clipboard?.writeText(b.dataset.copier); b.textContent = "Copié ✓"; setTimeout(() => (b.textContent = "Copier"), 1500); return; }
+    switch (b.dataset.act) {
+      case "editer": formulaire(); break;
+      case "annuler": vue(); break;
+      case "reinit":
+        if (!confirm(`Effacer la présentation, les jeux, les pseudos et les réseaux de ${P.nom} ?`)) return;
+        await fetch(`/api/profil?id=${P.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reinitialiser: true }) });
+        await charger(); break;
+      case "bannir": {
+        const raison = prompt(`Bannir ${P.nom} du site ?\nIl sera déconnecté et ne pourra plus revenir.\n\nRaison (visible par le staff) :`);
+        if (raison === null) return;
+        await bannir("bannir", raison); break;
+      }
+      case "debannir":
+        if (!confirm(`Redonner l'accès au site à ${P.nom} ?`)) return;
+        await bannir("debannir"); break;
+    }
+  });
+  async function bannir(action, raison = "") {
+    const r = await fetch("/api/admin-ban", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: P.id, action, raison, nom: P.nom }) });
+    if (!r.ok) { alert((await r.json().catch(() => ({}))).erreur === "impossible" ? "Impossible de bannir ce compte." : "Ça n'a pas marché, réessaie."); return; }
+    await charger();
+  }
+
+  async function charger() {
+    const r = await fetch(`/api/profil${idVoulu ? `?id=${encodeURIComponent(idVoulu)}` : ""}`);
+    if (r.status === 404) { c.innerHTML = '<div class="vide"><h1>Profil introuvable</h1><p>Ce membre n\'est jamais venu sur le site.</p><a class="btn btn-ghost" href="/">Retour à l\'accueil</a></div>'; return; }
+    if (!r.ok) { c.innerHTML = '<div class="vide"><h1>Oups</h1><p>Le profil n\'a pas pu être chargé. Recharge la page.</p></div>'; return; }
+    INFO = await r.json(); P = INFO.profil; vue();
+  }
+
+  Promise.all([initCompte(), chargerContenu()]).then(([u]) => {
+    if (!u) { c.innerHTML = `<div class="vide"><h1>Connecte-toi</h1><p>Ton profil Noctis se crée automatiquement à ta première connexion avec Discord.</p>${boutonConnexion()}</div>`; return; }
+    charger();
   });
 </script>
 </body></html>

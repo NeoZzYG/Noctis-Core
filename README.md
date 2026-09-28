@@ -70,7 +70,8 @@ Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les
   - La permission "Administrateur" sur Discord ne donne **pas** accès à l'admin du site
   - Après avoir modifié ces variables : Deploys → Trigger deploy
 - **Onglets** : Events, Tournois, Jeux, Staff, Boutique, Palmarès, Règlement
-- **Events** : les soirées de la Noctis, avec un badge **☾ Chill** ou **⚔ Compétitif** au choix
+- **Jeux** : chaque jeu ajouté devient une tuile cliquable sur l'accueil, qui filtre les events de ce jeu. Si tu renommes un jeu, ses events, tournois et palmarès suivent automatiquement
+- **Events** : le jeu se choisit dans la liste de l'onglet Jeux. Ce sont les soirées de la Noctis, avec un badge **☾ Chill** ou **⚔ Compétitif** au choix
 - **Tournois et Palmarès** : seulement les jeux compétitifs (LoL, CoD et Valorant). Pour en ajouter un, modifie `jeuxTournois` en haut de `public/app.js`
 - **Staff** : tape un pseudo dans "Ajouter un membre du serveur" pour le choisir parmi les membres Discord. Sa photo Discord et son statut ("En ligne sur le site", "Vu il y a 3 h") s'affichent tout seuls sur l'accueil. Être dans le staff ne donne pas accès à l'admin
   - Pour chercher dans **tout le serveur** (et pas seulement parmi les membres déjà venus sur le site) : portail développeur Discord → ton appli → **Bot** → active **Server Members Intent** → Enregistrer
@@ -79,6 +80,14 @@ Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les
 - Les events et tournois du site sont **indépendants de Discord** : les membres s'inscrivent directement sur le site (bouton "Je participe" / "S'inscrire"), leur avatar apparaît dans la liste des inscrits
 - Les données sont stockées dans **Netlify Blobs** (inclus gratuitement dans Netlify, rien à configurer)
 - Tant que rien n'a été enregistré dans l'admin, le site affiche les valeurs par défaut de `public/app.js`
+
+## Profils des membres
+- Chaque membre personnalise son profil (bouton "Personnaliser mon profil") : présentation, couleur, jeux favoris, Riot ID / Activision ID, réseaux (Twitch, TikTok, YouTube)
+- Le pseudo et la photo viennent de Discord
+- Les profils des autres se voient via `/profil.html?id=...` (liens depuis le staff et l'onglet Membres de l'admin)
+- **Admin** : sur le profil d'un membre → Modifier ce profil, Réinitialiser, Bannir du site / Débannir
+- **Onglet Membres** de l'admin : tous les membres venus sur le site, leur dernière visite, et le bannissement en un clic
+- Un membre banni est déconnecté tout de suite, ne peut plus se reconnecter, ni voir le contenu, ni s'inscrire. Ça ne le bannit pas du serveur Discord (à faire sur Discord si besoin)
 
 ## Boutique
 Chaque produit se configure dans `public/app.js` (bloc `produits`).

@@ -1,6 +1,6 @@
 // Recherche de membres pour l'onglet Staff de l'admin
 const { getSession } = require("./lib/session");
-const { lireMembres, estAdminLive, json } = require("./lib/store");
+const { lireMembres, lireBannis, estAdminLive, json } = require("./lib/store");
 
 const API = "https://discord.com/api/v10";
 
@@ -15,6 +15,15 @@ exports.handler = async (event) => {
   const q = ((event.queryStringParameters || {}).q || "").trim().slice(0, 50);
   const gid = process.env.DISCORD_GUILD_ID;
   const vus = await lireMembres(event).catch(() => ({}));
+
+  // Onglet "Membres" : tous les membres venus sur le site + les bannis
+  if ((event.queryStringParameters || {}).tous) {
+    const bannis = await lireBannis(event).catch(() => ({}));
+    const liste = Object.values(vus).map((m) => ({ id: m.id, nom: m.nom, username: m.username, avatar: m.avatar, vu: m.derniereVisite, premiere: m.premiereVisite, banni: bannis[m.id] || null }))
+      .sort((a, b) => (b.vu || "").localeCompare(a.vu || ""));
+    Object.entries(bannis).forEach(([id, b]) => { if (!vus[id]) liste.push({ id, nom: b.nom, username: "", avatar: "", vu: null, banni: b }); });
+    return json(200, { membres: liste });
+  }
 
   // 1. Tous les membres du serveur Discord (demande l'option "Server Members Intent" du bot)
   if (q) {

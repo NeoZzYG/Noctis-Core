@@ -1,4 +1,5 @@
 const { sign, parseCookies, cookie, SESSION_COOKIE, STATE_COOKIE } = require("./lib/session");
+const { lireBannis } = require("./lib/store");
 
 const API = "https://discord.com/api/v10";
 // Durée max d'un cookie dans les navigateurs (~400 jours), renouvelée à chaque visite
@@ -36,6 +37,10 @@ exports.handler = async (event) => {
   const userRes = await fetch(`${API}/users/@me`, { headers: { Authorization: `Bearer ${access_token}` } });
   if (!userRes.ok) return fail("discord");
   const user = await userRes.json();
+
+  // Banni du site : on s'arrête là (et on ne l'ajoute pas au serveur)
+  const bannis = await lireBannis(event).catch(() => ({}));
+  if (bannis[user.id]) return fail("banni");
 
   // 3. Ajout automatique au serveur Noctis (201 = ajouté, 204 = déjà membre)
   const joinRes = await fetch(`${API}/guilds/${guild}/members/${user.id}`, {

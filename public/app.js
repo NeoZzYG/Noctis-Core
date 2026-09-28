@@ -4,6 +4,8 @@ const NOCTIS = {
   twitch: "https://www.twitch.tv/TA-CHAINE",
   // Jeux proposés dans l'onglet Tournois et Palmarès de l'espace admin (le compétitif)
   jeuxTournois: ["League of Legends", "Call of Duty", "Valorant"],
+  // Réglages modifiables dans l'admin (valeurs par défaut)
+  reglages: { boutiqueEnConstruction: true },
   // Palmarès : ajoute une ligne à la fin de chaque tournoi (le plus récent en haut)
   // Le nombre de tournois affiché sur l'accueil se calcule tout seul à partir de cette liste.
   palmares: [
@@ -46,6 +48,7 @@ const DISCORD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.3 
 async function getUser() {
   try {
     const res = await fetch("/api/me", { credentials: "same-origin" });
+    if (res.status === 403) { location.replace("/connexion.html?erreur=banni"); return null; }
     if (!res.ok) return null;
     return (await res.json()).user;
   } catch {
@@ -126,6 +129,7 @@ async function chargerContenu() {
       if (d.contenu) ["events", "tournois", "jeux", "staff", "produits", "palmares", "reglement"].forEach((k) => {
         if (Array.isArray(d.contenu[k])) NOCTIS[k] = d.contenu[k];
       });
+      if (d.contenu && d.contenu.reglages) NOCTIS.reglages = { ...NOCTIS.reglages, ...d.contenu.reglages };
     }
   } catch {}
   NOCTIS.events = NOCTIS.events || [];
@@ -226,3 +230,11 @@ function statutStaff(s) {
   return `<span class="statut"><i></i>Vu ${d === "hier" ? "hier" : `il y a ${d}`}</span>`;
 }
 const avatarStaff = (s) => s.avatar || s.avatarAuto || s.avatarDiscord || "";
+
+// Deux noms désignent-ils le même jeu ? ("LoL", "League of Legends", "league of legende"…)
+function cleJeu(nom) {
+  const n = ` ${(nom || "").toLowerCase().trim()} `;
+  const auto = THEMES_JEUX.find((t) => t.mots.some((m) => new RegExp(`[^a-z0-9]${m}`).test(n)));
+  return auto ? auto.nom : n.trim();
+}
+const memeJeu = (a, b) => Boolean(a && b) && cleJeu(a) === cleJeu(b);

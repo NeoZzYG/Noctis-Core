@@ -61,9 +61,14 @@
   const JEUX_TOURNOIS = NOCTIS.jeuxTournois || ["League of Legends", "Call of Duty", "Valorant"];
 
   const SCHEMA = {
+    jeux: { label: "Jeux", aide: "Les jeux de la commu, affichés sur l'accueil. Leur couleur et leur sigle sont repris sur les events et tournois du même jeu.",
+      nouveau: () => ({ nom: "", sigle: "", couleur: "#c69428", detail: "", image: "" }), apercu: (j) => j.nom || "Nouveau jeu",
+      champs: [{ k: "nom", l: "Nom du jeu", t: "text", ph: "League of Legends" }, { k: "sigle", l: "Sigle (5 lettres max)", t: "text", ph: "LoL" },
+        { k: "couleur", l: "Couleur", t: "color" }, { k: "detail", l: "Petite description", t: "text", ph: "Customs et Flex tous les soirs", large: 1 }, { k: "image", l: "Visuel (format portrait)", t: "image" }] },
     events: { label: "Events", aide: "Les soirées du mois (Soirée LoL, Soirée CoD…). Elles s'affichent sur l'accueil avec leur décompte, et les membres s'inscrivent en un clic.",
       nouveau: () => ({ titre: "Soirée ", jeu: "", ambiance: "chill", date: "", places: null, description: "", image: "" }), apercu: (e) => `${e.titre || "Nouvel event"}${e.ambiance === "competitif" ? " · Compétitif" : " · Chill"}`,
-      champs: [{ k: "titre", l: "Titre", t: "text", ph: "Soirée Among Us" }, { k: "jeu", l: "Jeu", t: "jeu" },
+      champs: [{ k: "titre", l: "Titre", t: "text", ph: "Soirée Among Us" },
+        { k: "jeu", l: "Jeu (liste de l'onglet Jeux)", t: "select", options: () => [["", "— Aucun jeu précis —"], ...etat.jeux.filter((j) => j.nom).map((j) => [j.nom, j.nom])] },
         { k: "ambiance", l: "Ambiance", t: "select", options: [["chill", "☾ Chill"], ["competitif", "⚔ Compétitif"]] }, { k: "date", l: "Date et heure", t: "datetime" },
         { k: "places", l: "Places max", t: "number", ph: "Vide = illimité" }, { k: "description", l: "Description", t: "textarea", large: 1 }, { k: "image", l: "Image de couverture (optionnel)", t: "image" }] },
     tournois: { label: "Tournois", aide: "Les tournois officiels, affichés sur la page Tournois avec le décompte et la jauge d'inscrits.",
@@ -71,10 +76,6 @@
       champs: [{ k: "titre", l: "Titre", t: "text", ph: "Noctis Cup #1" }, { k: "jeu", l: "Jeu", t: "select", options: () => JEUX_TOURNOIS.map((j) => [j, j]) }, { k: "date", l: "Date et heure", t: "datetime" },
         { k: "format", l: "Format", t: "text", ph: "5v5 · élimination directe" }, { k: "places", l: "Places max", t: "number", ph: "Vide = illimité" },
         { k: "recompense", l: "Récompense", t: "text", ph: "Rôle Champion + 20 € de RP" }, { k: "description", l: "Description", t: "textarea", large: 1 }, { k: "image", l: "Image de couverture (optionnel)", t: "image" }] },
-    jeux: { label: "Jeux", aide: "Les jeux de la commu, affichés sur l'accueil. Leur couleur et leur sigle sont repris sur les events et tournois du même jeu.",
-      nouveau: () => ({ nom: "", sigle: "", couleur: "#c69428", detail: "", image: "" }), apercu: (j) => j.nom || "Nouveau jeu",
-      champs: [{ k: "nom", l: "Nom du jeu", t: "text", ph: "League of Legends" }, { k: "sigle", l: "Sigle (5 lettres max)", t: "text", ph: "LoL" },
-        { k: "couleur", l: "Couleur", t: "color" }, { k: "detail", l: "Petite description", t: "text", ph: "Customs et Flex tous les soirs", large: 1 }, { k: "image", l: "Visuel (format portrait)", t: "image" }] },
     staff: { label: "Staff", aide: "Les membres du staff mis en avant dans « La team » sur l'accueil, avec leur statut sur le site. Être dans le staff ne donne PAS accès à l'admin.",
       nouveau: () => ({ nom: "", role: "", couleur: "#c69428", avatar: "" }), apercu: (s) => `${s.nom || "Nouveau membre"}${s.role ? ` · ${s.role}` : ""}${s.username ? ` (@${s.username})` : ""}`,
       champs: [{ k: "nom", l: "Pseudo affiché", t: "text" }, { k: "role", l: "Rôle", t: "text", ph: "Modérateur" }, { k: "couleur", l: "Couleur du rôle", t: "color" },
@@ -137,13 +138,57 @@
     </article>`;
   }
 
+  const nav = () => `<nav class="onglets" aria-label="Sections">${Object.entries(SCHEMA).map(([k, v]) =>
+      `<button type="button" data-onglet="${k}"${k === onglet ? ' aria-current="true"' : ""}>${v.label}<small>${etat[k].length}</small></button>`).join("")}
+      <button type="button" data-onglet="membres"${onglet === "membres" ? ' aria-current="true"' : ""}>Membres${MEMBRES ? `<small>${MEMBRES.length}</small>` : ""}</button></nav>`;
+
+  // ----- Onglet Membres : profils et bannissements -----
+  let MEMBRES = null, filtre = "";
+  async function chargerMembres() {
+    try { MEMBRES = (await (await fetch("/api/admin-membres?tous=1")).json()).membres || []; } catch { MEMBRES = []; }
+  }
+  function rendreMembres() {
+    const t = filtre.toLowerCase();
+    const liste = (MEMBRES || []).filter((m) => !t || (m.nom || "").toLowerCase().includes(t) || (m.username || "").toLowerCase().includes(t));
+    const bannis = (MEMBRES || []).filter((m) => m.banni).length;
+    racine.innerHTML = `${nav()}
+      <div class="entete-onglet"><p>Tous les membres déjà venus sur le site${bannis ? ` · <b style="color:#ff6b76">${bannis} banni${bannis > 1 ? "s" : ""}</b>` : ""}. Un membre banni est déconnecté immédiatement et ne peut plus revenir sur le site.</p></div>
+      <label class="champ large" style="margin-bottom:1rem"><input type="search" id="filtre-membres" placeholder="Filtrer par pseudo…" value="${esc(filtre)}"></label>
+      ${MEMBRES === null ? '<p class="events-vide">Chargement…</p>' : `<ul class="liste-membres">${liste.map((m) => `<li class="${m.banni ? "est-banni" : ""}">
+        ${m.avatar ? `<img src="${esc(m.avatar)}" alt="">` : '<span class="av-vide"></span>'}
+        <span class="infos-m"><strong>${esc(m.nom)}</strong><small>${m.username ? `@${esc(m.username)} · ` : ""}${m.banni ? `Banni par ${esc(m.banni.par)}${m.banni.raison ? ` : ${esc(m.banni.raison)}` : ""}` : m.vu ? `vu il y a ${depuis(m.vu)}` : "jamais vu"}</small></span>
+        <a class="btn btn-ghost" href="/profil.html?id=${esc(m.id)}">Profil</a>
+        ${MOI && m.id === MOI.id ? "" : m.banni ? `<button type="button" class="btn btn-ghost" data-ban="debannir" data-id="${esc(m.id)}" data-nom="${esc(m.nom)}">Débannir</button>`
+          : `<button type="button" class="btn btn-danger" data-ban="bannir" data-id="${esc(m.id)}" data-nom="${esc(m.nom)}">Bannir</button>`}</li>`).join("") || '<li class="res-info">Aucun membre.</li>'}</ul>`}`;
+  }
+  racine.addEventListener("input", (ev) => {
+    if (ev.target.id !== "filtre-membres") return;
+    filtre = ev.target.value; const pos = ev.target.selectionStart;
+    rendreMembres(); const f = document.getElementById("filtre-membres"); f.focus(); f.setSelectionRange(pos, pos);
+  });
+  racine.addEventListener("click", async (ev) => {
+    const b = ev.target.closest("[data-ban]"); if (!b) return;
+    let raison = "";
+    if (b.dataset.ban === "bannir") { raison = prompt(`Bannir ${b.dataset.nom} du site ?\nIl sera déconnecté et ne pourra plus revenir.\n\nRaison (visible par le staff) :`); if (raison === null) return; }
+    else if (!confirm(`Redonner l'accès au site à ${b.dataset.nom} ?`)) return;
+    b.disabled = true;
+    const r = await fetch("/api/admin-ban", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: b.dataset.id, action: b.dataset.ban, raison, nom: b.dataset.nom }) });
+    if (!r.ok) { b.disabled = false; alert((await r.json().catch(() => ({}))).erreur === "impossible" ? "Impossible de bannir ce compte (toi-même ou le propriétaire du serveur)." : "Ça n'a pas marché, réessaie."); return; }
+    await chargerMembres(); rendreMembres();
+  });
+
   function rendre() {
+    if (onglet === "membres") { rendreMembres(); if (MEMBRES === null) chargerMembres().then(rendreMembres); return; }
     const s = SCHEMA[onglet], liste = etat[onglet];
     const noms = [...new Set([...(etat.jeux || []).map((j) => j.nom).filter(Boolean), ...JEUX_CONNUS])];
     racine.innerHTML = `
-      <nav class="onglets" aria-label="Sections">${Object.entries(SCHEMA).map(([k, v]) =>
-        `<button type="button" data-onglet="${k}"${k === onglet ? ' aria-current="true"' : ""}>${v.label}<small>${etat[k].length}</small></button>`).join("")}</nav>
+      ${nav()}
       <div class="entete-onglet"><p>${esc(s.aide)}</p><button type="button" class="btn btn-or" data-act="ajouter">+ Ajouter</button></div>
+      ${onglet === "produits" ? `<label class="interrupteur-chantier${etat.reglages.boutiqueEnConstruction ? " actif" : ""}">
+        <input type="checkbox" id="chantier"${etat.reglages.boutiqueEnConstruction ? " checked" : ""}>
+        <span class="bascule" aria-hidden="true"></span>
+        <span><strong>🚧 Boutique en cours de construction</strong><small>Les membres voient les articles avec un bandeau « Bientôt », mais ne peuvent pas commander. Décoche quand tout est prêt.</small></span>
+      </label>` : ""}
       ${onglet === "staff" ? `<div class="recherche-membres">
         <label class="champ large"><span class="lab">Ajouter un membre du serveur</span>
           <input type="search" id="q-membre" placeholder="Tape un pseudo Discord…" autocomplete="off"></label>
@@ -172,6 +217,10 @@
     if (i == null || !k || el.dataset.img != null) return;
     const c = SCHEMA[onglet].champs.find((x) => x.k === k);
     let v = el.type === "checkbox" ? el.checked : el.value;
+    if (onglet === "jeux" && k === "nom") {
+      const ancien = etat.jeux[i].nom;
+      if (ancien) ["events", "tournois", "palmares"].forEach((l) => etat[l].forEach((e) => { if (e.jeu === ancien) e.jeu = el.value; }));
+    }
     if (c.t === "number") v = el.value === "" ? null : Number(el.value);
     if (c.t === "datetime") v = versISO(el.value);
     etat[onglet][i][k] = v;
@@ -181,6 +230,12 @@
     marquer();
   };
   racine.addEventListener("input", saisie);
+  racine.addEventListener("change", (ev) => {
+    if (ev.target.id !== "chantier") return;
+    etat.reglages.boutiqueEnConstruction = ev.target.checked;
+    ev.target.closest(".interrupteur-chantier").classList.toggle("actif", ev.target.checked);
+    marquer();
+  });
   racine.addEventListener("change", (ev) => { if (ev.target.tagName === "SELECT") saisie(ev); });
 
   // Envoi d'image : redimensionnée dans le navigateur avant l'envoi
@@ -217,6 +272,7 @@
     const b = ev.target.closest("button");
     if (!b) return;
     if (b.dataset.onglet) { onglet = b.dataset.onglet; rendre(); return; }
+    if (b.dataset.ban || b.dataset.ajoutMembre) return;
     const liste = etat[onglet], i = Number(b.dataset.i);
     switch (b.dataset.act) {
       case "ajouter": liste.unshift({ id: id(), ...SCHEMA[onglet].nouveau() }); modifie = true; rendre(); racine.querySelector(".carte-admin input, .carte-admin textarea")?.focus(); break;
@@ -252,6 +308,7 @@
     etat = {
       events: avecId(src.events), tournois: avecId(src.tournois), jeux: avecId(src.jeux), staff: avecId(src.staff),
       produits: avecId(src.produits), palmares: avecId(src.palmares), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
+      reglages: { boutiqueEnConstruction: true, ...(NOCTIS.reglages || {}), ...(src.reglages || {}) },
     };
     if (src.majLe) majInfo = `Dernière mise à jour le ${new Date(src.majLe).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}${src.majPar ? ` par ${src.majPar}` : ""}`;
   }

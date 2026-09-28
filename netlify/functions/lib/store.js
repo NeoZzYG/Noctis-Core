@@ -8,7 +8,7 @@ function store(event) {
   return getStore({ name: "noctis" });
 }
 
-const VIDE = { events: [], tournois: [], jeux: [], staff: [], produits: [], palmares: [], reglement: [] };
+const VIDE = { events: [], tournois: [], jeux: [], staff: [], produits: [], palmares: [], reglement: [], reglages: { boutiqueEnConstruction: true } };
 
 async function lireContenu(event) {
   const c = await store(event).get("contenu", { type: "json" });
@@ -31,6 +31,14 @@ async function noterVisite(event, session) {
   membres[session.id] = { id: session.id, nom: session.name, username: session.username, avatar: session.avatar, premiereVisite: (m && m.premiereVisite) || now, derniereVisite: now };
   await store(event).setJSON("membres", membres);
 }
+
+// Profils personnalisés : { [id]: { bio, couleur, jeuxFavoris, pseudos, reseaux, majLe, majPar } }
+async function lireProfils(event) { return (await store(event).get("profils", { type: "json" })) || {}; }
+async function ecrireProfils(event, p) { await store(event).setJSON("profils", p); }
+
+// Bannis du site : { [id]: { nom, raison, par, le } }
+async function lireBannis(event) { return (await store(event).get("bannis", { type: "json" })) || {}; }
+async function ecrireBannis(event, b) { await store(event).setJSON("bannis", b); }
 
 // Infos du serveur (propriétaire + rôles), gardées 60 s en mémoire
 let cacheServeur = { t: 0, data: null };
@@ -74,4 +82,4 @@ function json(code, body, extra = {}) {
   return { statusCode: code, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...extra }, body: JSON.stringify(body) };
 }
 
-module.exports = { store, lireContenu, ecrireContenu, lireMembres, noterVisite, estAdmin, estAdminLive, json, VIDE };
+module.exports = { store, lireContenu, ecrireContenu, lireMembres, noterVisite, lireProfils, ecrireProfils, lireBannis, ecrireBannis, serveur, estAdmin, estAdminLive, json, VIDE };

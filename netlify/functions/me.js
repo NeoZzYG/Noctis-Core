@@ -1,5 +1,5 @@
 const { getSession, sign, cookie, SESSION_COOKIE } = require("./lib/session");
-const { noterVisite } = require("./lib/store");
+const { noterVisite, lireBannis } = require("./lib/store");
 
 const DUREE = 60 * 60 * 24 * 400;
 
@@ -9,6 +9,14 @@ exports.handler = async (event) => {
   if (!session) return { statusCode: 401, headers, body: JSON.stringify({ user: null }) };
 
   const { exp, ...donnees } = session;
+
+  // Membre banni du site : on coupe sa connexion
+  const bannis = await lireBannis(event).catch(() => ({}));
+  if (bannis[donnees.id]) {
+    headers["Set-Cookie"] = cookie(SESSION_COOKIE, "", 0);
+    return { statusCode: 403, headers, body: JSON.stringify({ user: null, banni: true, raison: bannis[donnees.id].raison || "" }) };
+  }
+
   // Statut "vu sur le site" (sans bloquer la page si le stockage a un souci)
   try { await noterVisite(event, donnees); } catch {}
 

@@ -1,11 +1,12 @@
 // Inscription / désinscription d'un membre à un event ou un tournoi
 const { getSession } = require("./lib/session");
-const { lireContenu, ecrireContenu, json } = require("./lib/store");
+const { lireContenu, ecrireContenu, lireBannis, json } = require("./lib/store");
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { erreur: "methode" });
   const session = getSession(event);
   if (!session) return json(401, { erreur: "connexion" });
+  if ((await lireBannis(event).catch(() => ({})))[session.id]) return json(403, { erreur: "banni" });
 
   let id;
   try { id = JSON.parse(event.body || "{}").id; } catch { return json(400, { erreur: "format" }); }

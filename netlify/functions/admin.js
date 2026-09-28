@@ -35,6 +35,8 @@ exports.handler = async (event) => {
     const avant = Object.fromEntries((ancien[cle] || []).map((e) => [e.id, e.inscrits || []]));
     propre[cle].forEach((e) => { e.inscrits = avant[e.id] || []; });
   }
+  const reg = recu.reglages || {};
+  propre.reglages = { boutiqueEnConstruction: Boolean(reg.boutiqueEnConstruction) };
   propre.majLe = new Date().toISOString();
   propre.majPar = session.name;
 

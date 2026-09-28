@@ -50,6 +50,7 @@
     <h1>Boutique</h1>
     <p>Le merch officiel Noctis. Certaines pièces sont réservées aux membres du serveur.</p>
   </section>
+  <p class="chantier grand" id="chantier-boutique" hidden><span>🚧</span> La boutique est en cours de construction. Les articles arrivent très bientôt, reste connecté !</p>
   <ul class="produits" id="produits"></ul>
 </div>
 </main>
@@ -68,9 +69,14 @@
   const eur = (n) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
   Promise.all([initCompte(), chargerContenu()]).then(([u]) => {
     const membre = u && u.isMember;
+    const chantier = Boolean(NOCTIS.reglages && NOCTIS.reglages.boutiqueEnConstruction);
+    document.getElementById("chantier-boutique").hidden = !chantier;
+    document.getElementById("produits").classList.toggle("en-construction", chantier);
     document.getElementById("produits").innerHTML = NOCTIS.produits.map((p) => {
       let action, note = "";
-      if (!p.lien) {
+      if (chantier) {
+        action = '<span class="btn btn-ghost" aria-disabled="true">Bientôt</span>';
+      } else if (!p.lien) {
         action = '<span class="btn btn-ghost" aria-disabled="true">Bientôt</span>';
       } else if (p.membres && !membre) {
         action = u ? `<a class="btn btn-ghost" href="${NOCTIS.discordInvite}">Rejoindre</a>` : '<a class="btn btn-ghost" href="/api/auth-login">Connexion</a>';
