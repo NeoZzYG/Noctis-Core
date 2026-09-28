@@ -1,4 +1,4 @@
 import { v2 } from "./lib/v2.mjs";
-import fonction from "./lib/handlers/logout.cjs";
+import { handler } from "./lib/handlers/logout.mjs";
 
-export default v2(fonction.handler);
+export default v2(handler);
