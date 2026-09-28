@@ -5,7 +5,7 @@ const API = "https://discord.com/api/v10";
 
 function store(event) {
   connectLambda(event);
-  return getStore({ name: "noctis", consistency: "strong" });
+  return getStore({ name: "noctis" });
 }
 
 const VIDE = { events: [], tournois: [], jeux: [], staff: [], produits: [], palmares: [], reglement: [] };
