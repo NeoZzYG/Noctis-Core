@@ -126,7 +126,6 @@
 </footer>
 <script src="/app.js"></script>
 <script>
-  const eur = (n) => Number(n).toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
   const fmt = (n) => Number(n).toLocaleString("fr-FR");
   afficherErreur();
   document.getElementById("cta-final").insertAdjacentHTML("afterbegin", DISCORD_SVG);
@@ -285,7 +284,7 @@
     document.getElementById("chantier-accueil").hidden = !chantier;
 
     // Vitrine boutique (3 premiers produits)
-    document.getElementById("vitrine").innerHTML = NOCTIS.produits.slice(0, 3).map((p) => `<li><a href="/boutique.html">
+    document.getElementById("vitrine").innerHTML = NOCTIS.produits.slice(0, 3).map((p) => `<li><a href="${lienProduit(p)}">
       <div class="visuel"><img src="${esc(p.image || "/assets/logo.png")}" alt="${esc(p.nom)}" loading="lazy" onerror="this.src='/assets/logo.png';this.className='fallback'"></div>
       <div class="ligne"><strong>${esc(p.nom)}</strong><span class="prix">${eur(p.prix)}</span></div>
       ${p.membres ? '<span class="reserve">Réservé aux membres</span>' : ""}</a></li>`).join("");

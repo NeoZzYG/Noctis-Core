@@ -11,7 +11,11 @@ const NETTOYEURS = {
   tournois: (e) => ({ id: idSur(e.id), titre: texte(e.titre, 120), jeu: texte(e.jeu, 60), date: texte(e.date, 40), format: texte(e.format, 120), places: nombre(e.places), recompense: texte(e.recompense, 160), description: texte(e.description, 800), image: texte(e.image, 300) }),
   jeux: (j) => ({ id: idSur(j.id), nom: texte(j.nom, 60), sigle: texte(j.sigle, 5), couleur: /^#[0-9a-f]{6}$/i.test(j.couleur) ? j.couleur : "#c69428", detail: texte(j.detail, 160), image: texte(j.image, 300) }),
   staff: (s) => ({ id: idSur(s.id), membreId: texte(s.membreId, 25).replace(/[^0-9]/g, ""), nom: texte(s.nom, 60), role: texte(s.role, 60), couleur: /^#[0-9a-f]{6}$/i.test(s.couleur) ? s.couleur : "#c69428", avatar: texte(s.avatar, 300), avatarDiscord: texte(s.avatarDiscord, 300), username: texte(s.username, 40) }),
-  produits: (p) => ({ id: idSur(p.id), nom: texte(p.nom, 80), prix: nombre(p.prix) || 0, image: texte(p.image, 300), lien: texte(p.lien, 300), membres: Boolean(p.membres) }),
+  produits: (p) => {
+    const images = (Array.isArray(p.images) ? p.images : p.image ? [p.image] : []).map((u) => texte(u, 300)).filter(Boolean).slice(0, 8);
+    return { id: idSur(p.id), nom: texte(p.nom, 80), prix: nombre(p.prix) || 0, description: texte(p.description, 1200), tailles: texte(p.tailles, 120),
+      images, image: images[0] || "", lien: texte(p.lien, 300), membres: Boolean(p.membres) };
+  },
   palmares: (p) => ({ id: idSur(p.id), tournoi: texte(p.tournoi, 120), jeu: texte(p.jeu, 60), date: texte(p.date, 20), vainqueur: texte(p.vainqueur, 80), finaliste: texte(p.finaliste, 80), participants: nombre(p.participants) }),
 };
 

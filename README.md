@@ -90,6 +90,8 @@ Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les
 - Un membre banni est déconnecté tout de suite, ne peut plus se reconnecter, ni voir le contenu, ni s'inscrire. Ça ne le bannit pas du serveur Discord (à faire sur Discord si besoin)
 
 ## Boutique
+- Dans l'admin → Boutique : nom, prix, tailles, description, jusqu'à 8 photos par article (la 1re est la principale), lien de paiement, réservé aux membres
+- Chaque article a sa propre page (`/produit.html?id=...`) avec la galerie photo, la description, les tailles et le bouton de commande
 Chaque produit se configure dans `public/app.js` (bloc `produits`).
 1. Crée un compte Stripe → **Payment Links** → un lien par produit (tailles en option personnalisée)
 2. Colle le lien dans `lien` : le bouton passe de "Bientôt" à "Commander"

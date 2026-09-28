@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Article · Noctis Core</title>
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
+<meta name="description" content="Le merch officiel Noctis Core : t-shirts, hoodies et maillots d'équipe.">
+<meta property="og:site_name" content="Noctis Core">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Boutique · Noctis Core">
+<meta property="og:description" content="Le merch officiel Noctis Core : t-shirts, hoodies et maillots d'équipe.">
+<meta property="og:url" content="https://noctis-core.com/boutique.html">
+<meta property="og:image" content="https://noctis-core.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="597">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /Aperçu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/assets/logo-mini.png" alt="" onerror="this.remove()">NOCTIS CORE</a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="/" >Accueil</a>
+      <a href="/tournois.html">Tournois</a>
+      <a href="/classement.html" >Classement</a>
+      <a href="/boutique.html" aria-current="page">Boutique</a>
+    </nav>
+    <div id="compte"></div>
+  </div>
+</header>
+<nav class="nav-mobile" aria-label="Navigation mobile">
+  <a href="/" >Accueil</a>
+  <a href="/tournois.html">Tournois</a>
+  <a href="/classement.html" >Classement</a>
+  <a href="/boutique.html" aria-current="page">Boutique</a>
+</nav>
+<main>
+<div class="wrap" id="fiche"><p class="vide">Chargement de l'article…</p></div>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <span>© 2026 Noctis Core [NcG]</span>
+    <nav aria-label="Réseaux">
+      <a data-discord href="#">Discord</a>
+      <a data-twitch href="#">Twitch</a>
+    </nav>
+  </div>
+</footer>
+<script src="/app.js"></script>
+
+<script>
+  const fiche = document.getElementById("fiche");
+  const id = new URLSearchParams(location.search).get("id");
+  let photo = 0;
+
+  function afficher(p) {
+    const photos = photosProduit(p), a = actionProduit(p, true);
+    const chantier = Boolean(NOCTIS.reglages && NOCTIS.reglages.boutiqueEnConstruction);
+    const tailles = (p.tailles || "").split(/[,;/]/).map((t) => t.trim()).filter(Boolean);
+    document.title = `${p.nom} · Noctis Core`;
+    const autres = NOCTIS.produits.filter((x) => x.id !== p.id).slice(0, 3);
+    fiche.innerHTML = `
+      <nav class="fil"><a href="/boutique.html">← Boutique</a></nav>
+      <article class="fiche-produit">
+        <div class="galerie${chantier ? " en-construction" : ""}">
+          <div class="visuel principal">
+            <img id="photo-principale" src="${esc(photos[0] || "/assets/logo.png")}" alt="${esc(p.nom)}">
+            ${photos.length > 1 ? `<button type="button" class="fleche g" data-photo="-1" aria-label="Photo précédente">‹</button>
+              <button type="button" class="fleche d" data-photo="1" aria-label="Photo suivante">›</button>
+              <span class="compteur" id="compteur-photo">1 / ${photos.length}</span>` : ""}
+          </div>
+          ${photos.length > 1 ? `<div class="miniatures">${photos.map((u, n) => `<button type="button" data-mini="${n}"${n === 0 ? ' aria-current="true"' : ""}><img src="${esc(u)}" alt="Photo ${n + 1}"></button>`).join("")}</div>` : ""}
+        </div>
+        <div class="infos-produit">
+          ${chantier ? '<p class="chantier"><span>🚧</span> Boutique en cours de construction</p>' : ""}
+          ${p.membres ? '<p class="etiquette-membres">Réservé aux membres</p>' : ""}
+          <h1>${esc(p.nom)}</h1>
+          <p class="prix-grand">${eur(p.prix)}</p>
+          ${p.description ? `<p class="desc-produit">${esc(p.description)}</p>` : ""}
+          <div class="tailles"><span class="lab">Tailles</span>
+            <div>${tailles.length ? tailles.map((t) => `<span class="taille">${esc(t)}</span>`).join("") : '<span class="taille">Taille unique</span>'}</div>
+            ${tailles.length && p.lien && !chantier ? '<small>Tu choisis ta taille au moment du paiement.</small>' : ""}</div>
+          <div class="achat">${a.html}</div>
+          ${a.note ? `<p class="note">${a.note}</p>` : ""}
+          <ul class="rassurance"><li>🔒 Paiement sécurisé par Stripe</li><li>⚜ Merch officiel Noctis Core</li></ul>
+        </div>
+      </article>
+      ${autres.length ? `<section class="autres"><h2>Autres articles</h2><ul class="vitrine">${autres.map((x) => `<li><a href="${lienProduit(x)}">
+        <div class="visuel"><img src="${esc(photosProduit(x)[0] || "/assets/logo.png")}" alt="${esc(x.nom)}" loading="lazy"></div>
+        <div class="ligne"><strong>${esc(x.nom)}</strong><span class="prix">${eur(x.prix)}</span></div></a></li>`).join("")}</ul></section>` : ""}`;
+
+    const aller = (n) => {
+      photo = (n + photos.length) % photos.length;
+      document.getElementById("photo-principale").src = photos[photo];
+      const cpt = document.getElementById("compteur-photo"); if (cpt) cpt.textContent = `${photo + 1} / ${photos.length}`;
+      fiche.querySelectorAll("[data-mini]").forEach((b) => b.toggleAttribute("aria-current", Number(b.dataset.mini) === photo));
+    };
+    fiche.onclick = (e) => {
+      const b = e.target.closest("[data-photo], [data-mini]"); if (!b) return;
+      aller(b.dataset.mini != null ? Number(b.dataset.mini) : photo + Number(b.dataset.photo));
+    };
+    document.onkeydown = (e) => { if (photos.length > 1 && e.key === "ArrowLeft") aller(photo - 1); if (photos.length > 1 && e.key === "ArrowRight") aller(photo + 1); };
+    // glisser du doigt sur mobile
+    let x0 = null; const img = document.getElementById("photo-principale");
+    img.addEventListener("touchstart", (e) => (x0 = e.touches[0].clientX), { passive: true });
+    img.addEventListener("touchend", (e) => { if (x0 == null || photos.length < 2) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) aller(photo + (dx < 0 ? 1 : -1)); x0 = null; });
+  }
+
+  Promise.all([initCompte(), chargerContenu()]).then(() => {
+    const p = NOCTIS.produits.find((x) => String(x.id) === id);
+    if (!p) { fiche.innerHTML = '<div class="vide"><h1>Article introuvable</h1><p>Cet article n\'existe plus ou a été retiré de la boutique.</p><a class="btn btn-ghost" href="/boutique.html">Retour à la boutique</a></div>'; return; }
+    afficher(p);
+  });
+</script>
+</body></html>

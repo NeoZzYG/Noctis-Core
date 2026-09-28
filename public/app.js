@@ -36,9 +36,9 @@ const NOCTIS = {
   // image : mets tes visuels dans public/assets/boutique/
   // membres: true => achat réservé aux gars connectés et présents sur le serveur
   produits: [
-    { nom: "T-shirt Noctis", prix: 25, image: "/assets/boutique/tshirt.png", lien: "", membres: false },
-    { nom: "Hoodie Noctis", prix: 45, image: "/assets/boutique/hoodie.png", lien: "", membres: false },
-    { nom: "Maillot équipe NcG", prix: 40, image: "/assets/boutique/maillot.png", lien: "", membres: true },
+    { id: "tshirt", tailles: "XS, S, M, L, XL, XXL, XXXL", nom: "T-shirt Noctis", prix: 25, image: "/assets/boutique/tshirt.png", lien: "", membres: false },
+    { id: "hoodie", tailles: "XS, S, M, L, XL, XXL, XXXL", nom: "Hoodie Noctis", prix: 45, image: "/assets/boutique/hoodie.png", lien: "", membres: false },
+    { id: "maillot", tailles: "XS, S, M, L, XL, XXL, XXXL", nom: "Maillot équipe NcG", prix: 40, image: "/assets/boutique/maillot.png", lien: "", membres: true },
   ],
 };
 // ==========================================================
@@ -238,3 +238,16 @@ function cleJeu(nom) {
   return auto ? auto.nom : n.trim();
 }
 const memeJeu = (a, b) => Boolean(a && b) && cleJeu(a) === cleJeu(b);
+
+// ============ BOUTIQUE ============
+const eur = (n) => Number(n || 0).toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
+const photosProduit = (p) => (p.images && p.images.length ? p.images : p.image ? [p.image] : []);
+const lienProduit = (p) => `/produit.html?id=${encodeURIComponent(p.id || "")}`;
+// Bouton d'achat selon l'état de la boutique et du membre
+function actionProduit(p, grand) {
+  const taille = grand ? " btn-lg" : "";
+  const chantier = Boolean(NOCTIS.reglages && NOCTIS.reglages.boutiqueEnConstruction);
+  if (chantier || !p.lien) return { html: `<span class="btn btn-ghost${taille}" aria-disabled="true">Bientôt</span>`, note: chantier ? "" : "Pas encore disponible à la commande." };
+  if (p.membres && !(MOI && MOI.isMember)) return { html: `<a class="btn btn-ghost${taille}" href="${NOCTIS.discordInvite}">Rejoindre le serveur</a>`, note: "Réservé aux membres du serveur Noctis." };
+  return { html: `<a class="btn btn-or${taille}" href="${esc(p.lien)}" target="_blank" rel="noopener">Commander</a>`, note: p.membres ? "Réservé aux membres" : "" };
+}

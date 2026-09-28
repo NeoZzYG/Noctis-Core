@@ -81,9 +81,11 @@
       champs: [{ k: "nom", l: "Pseudo affiché", t: "text" }, { k: "role", l: "Rôle", t: "text", ph: "Modérateur" }, { k: "couleur", l: "Couleur du rôle", t: "color" },
         { k: "avatar", l: "Photo perso (optionnel : sinon sa photo Discord)", t: "image" }] },
     produits: { label: "Boutique", aide: "Les articles de la boutique. Pour vendre, colle le lien de paiement Stripe (Payment Link) du produit.",
-      nouveau: () => ({ nom: "", prix: 0, image: "", lien: "", membres: false }), apercu: (p) => p.nom || "Nouveau produit",
-      champs: [{ k: "nom", l: "Nom", t: "text", ph: "Hoodie Noctis" }, { k: "prix", l: "Prix (€)", t: "number" }, { k: "lien", l: "Lien de paiement (vide = « Bientôt »)", t: "text", ph: "https://buy.stripe.com/…", large: 1 },
-        { k: "membres", l: "Réservé aux membres du serveur", t: "checkbox" }, { k: "image", l: "Photo du produit (carrée)", t: "image" }] },
+      nouveau: () => ({ nom: "", prix: 0, description: "", tailles: "XS, S, M, L, XL, XXL, XXXL", images: [], lien: "", membres: false }), apercu: (p) => p.nom || "Nouveau produit",
+      champs: [{ k: "nom", l: "Nom", t: "text", ph: "Hoodie Noctis" }, { k: "prix", l: "Prix (€)", t: "number" }, { k: "tailles", l: "Tailles disponibles", t: "text", ph: "XS, S, M, L, XL, XXL, XXXL (vide = taille unique)" },
+        { k: "description", l: "Description (matière, coupe, détails…)", t: "textarea", large: 1 },
+        { k: "lien", l: "Lien de paiement (vide = « Bientôt »)", t: "text", ph: "https://buy.stripe.com/…", large: 1 },
+        { k: "membres", l: "Réservé aux membres du serveur", t: "checkbox" }, { k: "images", l: "Photos (la 1re est la photo principale, 8 max)", t: "galerie" }] },
     palmares: { label: "Palmarès", aide: "Ajoute une ligne à la fin de chaque tournoi. Le nombre de tournois sur l'accueil se calcule tout seul.",
       nouveau: () => ({ tournoi: "", jeu: JEUX_TOURNOIS[0] || "", date: new Date().toISOString().slice(0, 10), vainqueur: "", finaliste: "", participants: null }), apercu: (p) => p.tournoi ? `${p.tournoi} · 🏆 ${p.vainqueur || "?"}` : "Nouveau résultat",
       champs: [{ k: "tournoi", l: "Tournoi", t: "text" }, { k: "jeu", l: "Jeu", t: "select", options: () => JEUX_TOURNOIS.map((j) => [j, j]) }, { k: "date", l: "Date", t: "date" },
@@ -118,6 +120,18 @@
           <div class="img-apercu">${v ? `<img src="${esc(v)}" alt="">` : "<span>Aucune image</span>"}</div>
           <div class="img-boutons"><label class="btn btn-ghost">${v ? "Changer" : "Choisir une image"}<input type="file" accept="image/*" data-img data-i="${i}" data-k="${c.k}" hidden></label>
           ${v ? `<button type="button" class="btn btn-ghost" data-act="retirer" data-i="${i}" data-k="${c.k}">Retirer</button>` : ""}</div></div></div>`;
+      case "galerie": {
+        const l = Array.isArray(v) ? v : [];
+        return `<div class="${cls} large champ-galerie">${lab}<div class="galerie-admin">
+          ${l.map((u, n) => `<figure><img src="${esc(u)}" alt="">${n === 0 ? "<figcaption>Principale</figcaption>" : ""}
+            <span class="gal-outils">
+              <button type="button" data-act="gal-gauche" data-i="${i}" data-k="${c.k}" data-n="${n}" ${n === 0 ? "disabled" : ""} aria-label="Avancer">←</button>
+              <button type="button" data-act="gal-suppr" data-i="${i}" data-k="${c.k}" data-n="${n}" aria-label="Retirer">✕</button>
+              <button type="button" data-act="gal-droite" data-i="${i}" data-k="${c.k}" data-n="${n}" ${n === l.length - 1 ? "disabled" : ""} aria-label="Reculer">→</button>
+            </span></figure>`).join("")}
+          ${l.length < 8 ? `<label class="gal-ajout"><input type="file" accept="image/*" multiple data-galerie data-i="${i}" data-k="${c.k}" hidden><span>+</span>Ajouter des photos</label>` : ""}
+        </div></div>`;
+      }
       default: return `<label class="${cls}">${lab}<input type="text" ${attr} value="${esc(v || "")}" placeholder="${esc(c.ph || "")}"></label>`;
     }
   }
@@ -238,6 +252,20 @@
   });
   racine.addEventListener("change", (ev) => { if (ev.target.tagName === "SELECT") saisie(ev); });
 
+  // Galerie : envoi de plusieurs photos d'un coup
+  racine.addEventListener("change", async (ev) => {
+    const el = ev.target;
+    if (el.dataset.galerie == null || !el.files.length) return;
+    const cible = etat[onglet][el.dataset.i];
+    cible[el.dataset.k] = Array.isArray(cible[el.dataset.k]) ? cible[el.dataset.k] : [];
+    const fichiers = [...el.files].slice(0, 8 - cible[el.dataset.k].length);
+    el.closest(".gal-ajout").innerHTML = `<span>…</span>Envoi de ${fichiers.length} photo${fichiers.length > 1 ? "s" : ""}`;
+    for (const f of fichiers) {
+      try { cible[el.dataset.k].push(await envoyerImage(f)); } catch { alert(`La photo « ${f.name} » n'a pas pu être envoyée.`); }
+    }
+    modifie = true; rendre();
+  });
+
   // Envoi d'image : redimensionnée dans le navigateur avant l'envoi
   racine.addEventListener("change", async (ev) => {
     const el = ev.target;
@@ -283,6 +311,12 @@
       case "haut": [liste[i - 1], liste[i]] = [liste[i], liste[i - 1]]; modifie = true; rendre(); break;
       case "bas": [liste[i + 1], liste[i]] = [liste[i], liste[i + 1]]; modifie = true; rendre(); break;
       case "retirer": liste[i][b.dataset.k] = ""; modifie = true; rendre(); break;
+      case "gal-suppr": case "gal-gauche": case "gal-droite": {
+        const g = liste[i][b.dataset.k], n = Number(b.dataset.n);
+        if (b.dataset.act === "gal-suppr") g.splice(n, 1);
+        else { const m = b.dataset.act === "gal-gauche" ? n - 1 : n + 1; [g[m], g[n]] = [g[n], g[m]]; }
+        modifie = true; rendre(); break;
+      }
       case "enregistrer": await enregistrer(b); break;
     }
   });
@@ -307,7 +341,7 @@
     const avecId = (l) => (l || []).map((x) => ({ id: x.id || id(), ...x }));
     etat = {
       events: avecId(src.events), tournois: avecId(src.tournois), jeux: avecId(src.jeux), staff: avecId(src.staff),
-      produits: avecId(src.produits), palmares: avecId(src.palmares), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
+      produits: avecId(src.produits).map((p) => ({ tailles: "XS, S, M, L, XL, XXL, XXXL", description: "", ...p, images: p.images && p.images.length ? p.images : p.image ? [p.image] : [] })), palmares: avecId(src.palmares), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
       reglages: { boutiqueEnConstruction: true, ...(NOCTIS.reglages || {}), ...(src.reglages || {}) },
     };
     if (src.majLe) majInfo = `Dernière mise à jour le ${new Date(src.majLe).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}${src.majPar ? ` par ${src.majPar}` : ""}`;

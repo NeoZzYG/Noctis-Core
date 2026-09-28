@@ -45,14 +45,18 @@
   <a href="/boutique.html" aria-current="page">Boutique</a>
 </nav>
 <main>
-<div class="wrap">
-  <section class="boutique-tete">
-    <h1>Boutique</h1>
-    <p>Le merch officiel Noctis. Certaines pièces sont réservées aux membres du serveur.</p>
-  </section>
-  <p class="chantier grand" id="chantier-boutique" hidden><span>🚧</span> La boutique est en cours de construction. Les articles arrivent très bientôt, reste connecté !</p>
-  <ul class="produits" id="produits"></ul>
-</div>
+<section class="page-tete">
+  <h1>Boutique</h1>
+  <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
+  <p class="devise">Porte les couleurs</p>
+  <p class="intro-page">Le merch officiel Noctis Core. Certaines pièces sont réservées aux membres du serveur.</p>
+</section>
+<section class="bloc bloc-boutique">
+  <div class="wrap">
+    <p class="chantier grand" id="chantier-boutique" hidden><span>🚧</span> La boutique est en cours de construction. Les articles arrivent très bientôt, reste connecté !</p>
+    <ul class="produits" id="produits"></ul>
+  </div>
+</section>
 </main>
 <footer class="pied">
   <div class="wrap">
@@ -66,32 +70,21 @@
 <script src="/app.js"></script>
 
 <script>
-  const eur = (n) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
-  Promise.all([initCompte(), chargerContenu()]).then(([u]) => {
-    const membre = u && u.isMember;
+  Promise.all([initCompte(), chargerContenu()]).then(() => {
     const chantier = Boolean(NOCTIS.reglages && NOCTIS.reglages.boutiqueEnConstruction);
     document.getElementById("chantier-boutique").hidden = !chantier;
-    document.getElementById("produits").classList.toggle("en-construction", chantier);
-    document.getElementById("produits").innerHTML = NOCTIS.produits.map((p) => {
-      let action, note = "";
-      if (chantier) {
-        action = '<span class="btn btn-ghost" aria-disabled="true">Bientôt</span>';
-      } else if (!p.lien) {
-        action = '<span class="btn btn-ghost" aria-disabled="true">Bientôt</span>';
-      } else if (p.membres && !membre) {
-        action = u ? `<a class="btn btn-ghost" href="${NOCTIS.discordInvite}">Rejoindre</a>` : '<a class="btn btn-ghost" href="/api/auth-login">Connexion</a>';
-        note = u ? "Réservé aux membres : rejoins le serveur pour le commander." : "Réservé aux membres : connecte-toi avec Discord.";
-      } else {
-        action = `<a class="btn btn-discord" href="${esc(p.lien)}" target="_blank" rel="noopener">Commander</a>`;
-        if (p.membres) note = "Réservé aux membres";
-      }
+    const liste = document.getElementById("produits");
+    liste.classList.toggle("en-construction", chantier);
+    liste.innerHTML = NOCTIS.produits.map((p) => {
+      const a = actionProduit(p), photos = photosProduit(p);
       return `<li class="produit">
-        <div class="visuel"><img src="${esc(p.image || "/assets/logo.png")}" alt="${esc(p.nom)}" onerror="this.outerHTML='<span class=sans-image>NC</span>'"></div>
-        <h2>${esc(p.nom)}</h2>
-        <div class="ligne"><span class="prix">${eur(p.prix)}</span>${action}</div>
-        ${note ? `<p class="note">${note}</p>` : ""}
+        <a class="visuel" href="${lienProduit(p)}"><img src="${esc(photos[0] || "/assets/logo.png")}" alt="${esc(p.nom)}" loading="lazy">
+          ${photos.length > 1 ? `<span class="nb-photos">${photos.length} photos</span>` : ""}</a>
+        <h2><a href="${lienProduit(p)}">${esc(p.nom)}</a></h2>
+        <div class="ligne"><span class="prix">${eur(p.prix)}</span><a class="btn btn-ghost" href="${lienProduit(p)}">Voir</a></div>
+        ${a.note ? `<p class="note">${a.note}</p>` : ""}
       </li>`;
-    }).join("");
+    }).join("") || '<li class="events-vide">Aucun article pour le moment.</li>';
   });
 </script>
 </body></html>
