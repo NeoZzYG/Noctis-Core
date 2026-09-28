@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Noctis Core</title>
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
+<meta name="description" content="Communauté multigaming française : events, tournois et boutique. Unis par le jeu, portés par la passion.">
+<meta property="og:site_name" content="Noctis Core">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Noctis Core">
+<meta property="og:description" content="Communauté multigaming française : events, tournois et boutique. Unis par le jeu, portés par la passion.">
+<meta property="og:url" content="https://noctis-core.com/">
+<meta property="og:image" content="https://noctis-core.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="597">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /Aperçu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="page-accueil page-connexion">
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <span class="marque"><img src="/assets/logo-mini.png" alt="">NOCTIS CORE</span>
+  </div>
+</header>
+<main>
+<section class="scene">
+  <img class="decor gauche" src="/assets/decor-gauche.jpg" alt="" aria-hidden="true">
+  <img class="decor droit" src="/assets/decor-droit.jpg" alt="" aria-hidden="true">
+  <canvas id="braises" aria-hidden="true"></canvas>
+  <p class="slogan gauche">Unis par le jeu</p>
+  <p class="slogan droit">Portés par la passion</p>
+  <div class="scene-centre">
+    <h1 class="sr-only">Noctis Core, communauté multigaming française</h1>
+    <img class="logo-hero" src="/assets/logo.png" alt="Noctis Core : communauté, esport, passion" width="900" height="900">
+    <div class="actions">
+      <a class="btn btn-or btn-xl" id="entrer" href="/api/auth-login">Entrer avec Discord</a>
+    </div>
+    <p class="note-connexion">En te connectant, tu rejoins automatiquement le serveur Noctis Core et tu débloques tout le site : events, tournois, classement et boutique.</p>
+    <div id="erreur"></div>
+  </div>
+  <ul class="valeurs" aria-label="Nos valeurs">
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59C2.6 9.4 2 14.46 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.41-1.41A2 2 0 0 1 9.83 16h4.34a2 2 0 0 1 1.41.59L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.54-.6-6.58-.68-7.26A4 4 0 0 0 17.32 5z"/></svg>Multigaming</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>Communauté</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Compétition</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" x2="19" y1="19" y2="13"/><line x1="16" x2="20" y1="16" y2="20"/><line x1="19" x2="21" y1="21" y2="19"/><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/><line x1="5" x2="9" y1="14" y2="18"/><line x1="7" x2="4" y1="17" y2="20"/><line x1="3" x2="5" y1="19" y2="21"/></svg>Esprit d'équipe</li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>Dépassement</li>
+  </ul>
+</section>
+</main>
+<script src="/app.js"></script>
+<script>
+  // Garder la page demandée pour y revenir après la connexion
+  const params = new URLSearchParams(location.search);
+  const retour = params.get("retour");
+  if (retour) document.getElementById("entrer").href = `/api/auth-login?retour=${encodeURIComponent(retour)}`;
+  document.getElementById("entrer").insertAdjacentHTML("afterbegin", DISCORD_SVG);
+  ERREURS.serveur = "Impossible de t'ajouter au serveur Noctis pour le moment. Réessaie dans quelques minutes.";
+  ERREURS.refuse = "Discord a refusé l'ajout au serveur. Si tu as été exclu du serveur, contacte le staff.";
+  afficherErreur();
+
+  // Braises tricolores
+  const cv = document.getElementById("braises"), ctx = cv.getContext("2d");
+  const calme = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, braises = [];
+  function taille() {
+    const r = Math.min(devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight; cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0);
+  }
+  function nouvelle(depart) {
+    const t = Math.random();
+    // 45% bleu a gauche, 45% rouge a droite, 10% or au centre
+    const [zx, c] = t < .45 ? [[0, .38], "70,110,255"] : t < .9 ? [[.62, 1], "235,45,55"] : [[.35, .65], "230,185,90"];
+    return { x: W * (zx[0] + Math.random() * (zx[1] - zx[0])), y: depart ? Math.random() * H : H + 10,
+      r: Math.random() * 1.8 + .4, vy: -(Math.random() * .7 + .25), vx: (Math.random() - .5) * .3,
+      vie: 0, max: 300 + Math.random() * 400, c, o: Math.random() * 6.28 };
+  }
+  function anime() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    for (let i = 0; i < braises.length; i++) {
+      const b = braises[i];
+      b.vie++; b.y += b.vy; b.x += b.vx + Math.sin((b.vie + b.o * 50) / 40) * .25;
+      const a = Math.sin(Math.PI * b.vie / b.max) * .9;
+      if (b.vie > b.max || b.y < -10) { braises[i] = nouvelle(false); continue; }
+      const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r * 4);
+      g.addColorStop(0, `rgba(${b.c},${a})`); g.addColorStop(1, `rgba(${b.c},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, b.y, b.r * 4, 0, 6.28); ctx.fill();
+    }
+    requestAnimationFrame(anime);
+  }
+  taille(); addEventListener("resize", taille);
+  if (!calme) {
+    braises = Array.from({ length: Math.round(Math.min(W, 1600) / 12) }, () => nouvelle(true));
+    anime();
+  }
+</script>
+</body></html>

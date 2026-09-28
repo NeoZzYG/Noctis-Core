@@ -2,8 +2,19 @@
 const NOCTIS = {
   discordInvite: "https://discord.gg/gkhTGB5mc7",
   twitch: "https://www.twitch.tv/TA-CHAINE",
-  // Chiffres affichés dans "La team" (membres et en ligne sont récupérés en direct depuis Discord)
-  tournoisJoues: 0,
+  // Palmarès : ajoute une ligne à la fin de chaque tournoi (le plus récent en haut)
+  // Le nombre de tournois affiché sur l'accueil se calcule tout seul à partir de cette liste.
+  palmares: [
+    // { tournoi: "Tournoi d'ouverture", jeu: "Soirée LoL", date: "2026-10-24", vainqueur: "Team Alpha", finaliste: "Team Bravo", participants: 16 },
+  ],
+  // Règlement général affiché sur la page Tournois
+  reglement: [
+    "Fair-play obligatoire : insultes, triche ou abandon volontaire = exclusion du tournoi.",
+    "Être présent sur le vocal Discord 15 minutes avant le début pour le check-in.",
+    "Un retard de plus de 10 minutes après l'heure du match = défaite par forfait.",
+    "Les décisions des organisateurs sont définitives. En cas de litige, on en parle calmement en MP.",
+    "Les captures d'écran de fin de partie servent de preuve : pense à les faire.",
+  ],
   // Staff mis en avant : avatar = lien d'image (optionnel), couleur = couleur du rôle
   staff: [
     { nom: "Noctis Nx", role: "Fondateur", couleur: "#c69428", avatar: "" },
@@ -78,7 +89,7 @@ function afficherErreur() {
 // Le jeu est détecté dans le nom de l'event Discord ("Soirée LoL", "Soirée CoD"...).
 // Ajoute une ligne ici pour un nouveau jeu : mots-clés, nom affiché, sigle, couleur.
 const THEMES_JEUX = [
-  { mots: ["lol", "league"], nom: "League of Legends", sigle: "LoL", couleur: "#c8aa6e" },
+  { mots: ["lol", "league of"], nom: "League of Legends", sigle: "LoL", couleur: "#c8aa6e" },
   { mots: ["cod", "call of duty", "warzone"], nom: "Call of Duty", sigle: "CoD", couleur: "#8fb339" },
   { mots: ["among"], nom: "Among Us", sigle: "AU", couleur: "#e8323c" },
   { mots: ["valo"], nom: "Valorant", sigle: "VAL", couleur: "#ff4655" },

@@ -12,8 +12,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Noctis Core">
 <meta property="og:description" content="Communauté multigaming française : events, tournois et boutique. Unis par le jeu, portés par la passion.">
-<meta property="og:url" content="https://noctis-core.netlify.app/">
-<meta property="og:image" content="https://noctis-core.netlify.app/assets/og-image.jpg">
+<meta property="og:url" content="https://noctis-core.com/">
+<meta property="og:image" content="https://noctis-core.com/assets/og-image.jpg">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="597">
 <meta property="og:locale" content="fr_FR">
@@ -55,7 +55,7 @@
     <h1 class="sr-only">Noctis Core, communauté multigaming française</h1>
     <img class="logo-hero" src="/assets/logo.png" alt="Noctis Core : communauté, esport, passion" width="900" height="900">
     <div class="actions" id="hero-actions">
-      <a class="btn btn-ghost btn-lg" data-discord href="#">Rejoindre le Discord</a>
+      <a class="btn btn-ghost btn-lg" data-discord href="#">Ouvrir le Discord</a>
     </div>
     <p class="en-ligne" id="en-ligne" hidden><i></i><span><b id="nb-en-ligne">0</b> en ligne sur le Discord</span></p>
     <div id="erreur"></div>
@@ -105,10 +105,10 @@
 </section>
 
 <section class="rejoindre">
-  <h2>Rejoins la team</h2>
+  <h2>On se retrouve en vocal</h2>
   <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
-  <p>Un salon vocal toujours ouvert, des tournois entre nous et des gars qui jouent pour gagner ensemble.</p>
-  <a class="btn btn-or btn-xl" data-discord href="#" id="cta-final">Rejoindre le Discord</a>
+  <p>Un salon vocal toujours ouvert, des tournois entre nous et des gars qui jouent pour gagner ensemble. Il ne manque plus que toi.</p>
+  <a class="btn btn-or btn-xl" data-discord href="#" id="cta-final">Ouvrir le Discord</a>
 </section>
 
 </main>
@@ -131,7 +131,7 @@
   // La team
   const fmt = (n) => Number(n).toLocaleString("fr-FR");
   document.getElementById("c-jeux").textContent = NOCTIS.jeux.length;
-  document.getElementById("c-tournois").textContent = NOCTIS.tournoisJoues;
+  document.getElementById("c-tournois").textContent = (NOCTIS.palmares || []).length;
   document.getElementById("staff").innerHTML = NOCTIS.staff.map((m) => `<li>
       <div class="av">${m.avatar ? `<img src="${esc(m.avatar)}" alt="">` : `<span>${esc(m.nom.charAt(0))}</span>`}</div>
       <strong>${esc(m.nom)}</strong><em style="color:${esc(m.couleur)}">${esc(m.role)}</em></li>`).join("");
@@ -159,7 +159,7 @@
   document.getElementById("cta-final").insertAdjacentHTML("afterbegin", DISCORD_SVG);
   initCompte().then((user) => {
     document.getElementById("hero-actions").insertAdjacentHTML("afterbegin", user
-      ? '<a class="btn btn-or btn-lg" href="/profil.html">Voir mon profil</a>'
+      ? '<a class="btn btn-or btn-lg" href="/tournois.html">Voir les tournois</a>'
       : `<a class="btn btn-or btn-lg" href="/api/auth-login">${DISCORD_SVG}Se connecter avec Discord</a>`);
   });
 
@@ -192,7 +192,7 @@
       <div class="corps">
         <h3>${esc(e.nom)}</h3>
         <p class="date">${date}</p>
-        ${e.description ? `<p class="desc">${esc(e.description.replace(/[*_~`>#|]/g, "").trim())}</p>` : ""}
+        ${e.description ? `<p class="desc">${esc(e.description.replace(/[*_~`>|]/g, "").trim())}</p>` : ""}
         <div class="zone-decompte"></div>
         <div class="pied-ev">
           <span class="interesses">${e.interesses ? `${e.interesses} partant${e.interesses > 1 ? "s" : ""}` : "Sois le 1er"}</span>

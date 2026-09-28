@@ -2,7 +2,7 @@
 
 ## Ce qui marche déjà
 - Accueil, pages Tournois et Classement (vides pour l'instant)
-- Connexion avec Discord, session de 7 jours
+- Connexion avec Discord, reste connecté en permanence
 - Détection automatique : membre du serveur Noctis ou non (badge "Membre Noctis")
 - Profil : avatar, pseudo serveur, date d'arrivée, nombre de rôles
 
@@ -28,7 +28,7 @@ En haut du fichier : lien d'invitation Discord, chaîne Twitch, liste des jeux.
 ### 3 bis. Events automatiques (bot Discord)
 Les events de l'accueil viennent de l'onglet **Événements** de ton serveur : tu crées l'event sur Discord, il apparaît sur le site (mise à jour toutes les 5 min).
 1. Dans la même appli Discord → onglet **Bot** → **Reset Token** → copie le token
-2. Onglet **OAuth2 → URL Generator** → coche `bot` (aucune permission nécessaire) → ouvre l'URL et ajoute le bot au serveur
+2. Onglet **OAuth2 → URL Generator** → coche `bot`, puis dans les permissions coche **Create Instant Invite** (nécessaire pour ajouter les membres au serveur à leur connexion) → ouvre l'URL et ajoute le bot au serveur
 3. Ajoute la variable `DISCORD_BOT_TOKEN` dans Netlify
 
 Conseils pour tes events :
@@ -54,11 +54,30 @@ Conseils pour tes events :
 ### 5. Teste
 Ouvre le site → "Se connecter avec Discord" → tu dois arriver sur ton profil avec le badge doré.
 
+## Accès au site (connexion obligatoire)
+- Toutes les pages demandent d'être connecté avec Discord. Sans connexion, on arrive sur `/connexion.html` (la couverture avec le bouton "Entrer avec Discord")
+- À la connexion, le membre est **ajouté automatiquement au serveur Noctis** (Discord lui affiche l'autorisation "Rejoindre des serveurs pour toi")
+- Après connexion, il revient sur la page qu'il voulait voir
+- Les robots d'aperçu (Discord, réseaux) peuvent toujours lire les pages pour afficher la carte du lien
+- Le verrou est géré par `netlify/edge-functions/garde.js`
+
 ## Aperçu du lien sur Discord
 Quand quelqu'un colle le lien du site sur Discord, une carte s'affiche : nom "Noctis Core", description, bannière et liseré doré.
 - Au déploiement, nomme ton site Netlify **noctis-core** (Site configuration → Change site name) pour avoir `noctis-core.netlify.app`
-- Si tu prends une autre adresse (nom de domaine perso), remplace `https://noctis-core.netlify.app` dans le haut de chaque page `.html` (Ctrl+F)
+- Si tu prends une autre adresse (nom de domaine perso), remplace `https://noctis-core.com` dans le haut de chaque page `.html` (Ctrl+F)
 - Discord garde l'aperçu en cache : si tu modifies les textes, ajoute `?v=2` à la fin du lien pour forcer la mise à jour
+
+## Tournois
+Automatiques aussi : tout event Discord dont le titre contient **Tournoi**, **Cup** ou **Coupe** apparaît sur la page Tournois.
+Dans la description de l'event, ces lignes deviennent des pastilles :
+```
+Format : 5v5 · élimination directe
+Places : 16
+Récompense : rôle Champion Noctis + 20 € de RP
+Le reste de la description s'affiche en texte normal.
+```
+- La jauge d'inscrits se base sur les gens qui cliquent "Intéressé" sur Discord
+- **Palmarès** et **règlement** : à modifier dans `public/app.js` (blocs `palmares` et `reglement`)
 
 ## Boutique
 Chaque produit se configure dans `public/app.js` (bloc `produits`).
