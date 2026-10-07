@@ -81,33 +81,35 @@
   }
   function carte(p) {
     const t = themeJeu(p.jeu || p.tournoi), nbJ = p.nbJoueurs || p.participants;
-    const nom = p.equipe || "Équipe Noctis";
-    return `<article class="tournoi-passe${p.place === 1 ? " gagne" : ""}${p.image ? " avec-image cup-large" : ""}" style="--c:${t.couleur}">
-      ${p.image ? `<button type="button" class="visuel-cup" data-zoom="${esc(p.image)}" aria-label="Agrandir l'affiche"><img src="${esc(p.image)}" alt="Affiche ${esc(p.tournoi)}" loading="lazy" onload="adapterCup(this)"></button>` : ""}
-      <div class="corps-cup">
-        <header>
-          <div><h3>${esc(p.tournoi)}</h3>
-            ${p.organisateur ? `<p class="orga">Organisé par <b>${esc(p.organisateur)}</b></p>` : ""}
-            <p class="meta"><span class="jeu-tag" style="--c:${t.couleur}">${esc(nomJeuComplet(p))}</span>
-              ${p.nbEquipes ? `<span>${p.nbEquipes} équipes</span>` : ""}${nbJ ? `<span>${nbJ} joueurs</span>` : ""}</p></div>
-          <span class="h-date">${dateFr(p.date, true)}</span>
-        </header>
-        <div class="notre-equipe">
-          <span class="medaille-cl">${medaille(p.place)}</span>
-          <div class="equipe">
-            <strong>${esc(nom)}</strong><small>${texteResultat(p)}</small>
-            ${(p.joueurs || []).length ? `<div class="squad">${p.joueurs.map(joueur).join("")}</div>` : ""}
-          </div>
+    const res = p.place ? (p.place === 1 ? "1re" : `${p.place}e`) : "—";
+    return `<article class="carte-cup${p.place === 1 ? " gagne" : ""}${p.image ? " avec-visuel" : ""}" style="--c:${t.couleur}${p.image ? `;--img:url('${esc(p.image)}')` : ""}">
+      ${p.image ? `<button type="button" class="cup-visuel" data-zoom="${esc(p.image)}" aria-label="Voir l'affiche en grand"><img src="${esc(p.image)}" alt="Affiche ${esc(p.tournoi)}" loading="lazy" onload="adapterCup(this)"><span class="loupe">⤢</span></button>` : ""}
+      <div class="cup-corps">
+        <div class="cup-tete">
+          <span class="cup-date">${dateFr(p.date, true)}</span>
+          <h3>${esc(p.tournoi)}</h3>
+          ${p.organisateur ? `<p class="orga">Organisé par <b>${esc(p.organisateur)}</b></p>` : ""}
+        </div>
+        <div class="cup-stats">
+          <div class="stat-jeu"><span>Jeu</span><b>${esc(t.nom)}</b>${p.edition ? `<small>${esc(p.edition)}</small>` : ""}</div>
+          <div><span>Équipes</span><b>${p.nbEquipes || "—"}</b></div>
+          <div><span>Joueurs</span><b>${nbJ || "—"}</b></div>
+          <div class="stat-resultat"><span>Résultat</span><b>${p.place && p.place <= 3 ? `${medaille(p.place)} ` : ""}${res}</b>${p.place && p.nbEquipes ? `<small>sur ${p.nbEquipes}</small>` : p.place ? "" : "<small>Participation</small>"}</div>
+        </div>
+        <div class="cup-equipe">
+          <span class="lab-cup">Notre équipe</span>
+          <strong>${esc(p.equipe || "Équipe Noctis")}</strong>
+          ${(p.joueurs || []).length ? `<div class="squad">${p.joueurs.map(joueur).join("")}</div>` : ""}
         </div>
       </div>
     </article>`;
   }
   // Affiche en hauteur : à côté du texte. Image large : en bannière.
   window.adapterCup = (img) => {
-    const carte = img.closest(".tournoi-passe");
+    const carte = img.closest(".carte-cup");
     const portrait = img.naturalHeight > img.naturalWidth * 1.05;
-    carte.classList.toggle("cup-portrait", portrait);
-    carte.classList.toggle("cup-large", !portrait);
+    carte.classList.toggle("portrait", portrait);
+    carte.classList.toggle("large", !portrait);
   };
   // Agrandir l'affiche au clic
   zone.addEventListener("click", (e) => {
@@ -131,7 +133,7 @@
     zone.innerHTML = `<section class="bloc"><div class="wrap">
       <div class="entete-bloc"><h2>Historique</h2>${filet}<p class="devise">${tout.length} cup${tout.length > 1 ? "s" : ""} disputée${tout.length > 1 ? "s" : ""}</p></div>
       ${jeux.length > 1 ? `<div class="filtres-jeux"><button type="button" data-filtre=""${!filtre ? ' aria-current="true"' : ""}>Tous</button>${jeux.map((j) => `<button type="button" data-filtre="${esc(j)}" style="--c:${themeJeu(j).couleur}"${filtre === j ? ' aria-current="true"' : ""}>${esc(j)}</button>`).join("")}</div>` : ""}
-      <div class="liste-tournois-passes">${histo.map(carte).join("")}</div>
+      <div class="liste-cups">${histo.map(carte).join("")}</div>
     </div></section>`;
   }
   zone.addEventListener("click", (e) => {

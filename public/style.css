@@ -1016,3 +1016,58 @@ a.joueur:hover { border-color: var(--or); color: var(--blanc); }
 .ligne-palmares input, .ligne-palmares select { min-width: 0; padding: .55rem .6rem; border-radius: 4px; border: 1px solid #262936; background: #050507; color: var(--blanc); font: 400 .9rem var(--texte); color-scheme: dark; }
 .aide-form { color: var(--gris); }
 @media (max-width: 960px) { .lecteur-live { grid-template-columns: 1fr; } .ligne-palmares { grid-template-columns: 1fr 1fr; } }
+
+/* Affiche en hauteur : on montre l'image ENTIÈRE (la carte s'allonge si besoin) */
+.tournoi-passe.cup-portrait { grid-template-columns: clamp(140px, 24%, 230px) 1fr; align-items: stretch; }
+.tournoi-passe.cup-portrait .visuel-cup { height: auto; min-height: 0; align-self: start; }
+.tournoi-passe.cup-portrait .visuel-cup img { position: static; width: 100%; height: auto; object-fit: contain; }
+.tournoi-passe.cup-portrait .corps-cup { display: flex; flex-direction: column; justify-content: center; }
+@media (max-width: 600px) {
+  .tournoi-passe.cup-portrait .visuel-cup { height: auto; display: flex; justify-content: center; background: #050507; }
+  .tournoi-passe.cup-portrait .visuel-cup img { width: min(260px, 70%); }
+}
+
+/* ================= PALMARÈS : CARTES HARMONISÉES ================= */
+.liste-cups { display: grid; gap: 1.4rem; max-width: 1000px; margin: 0 auto; }
+.carte-cup { position: relative; isolation: isolate; overflow: hidden; border-radius: 10px; background: #0b0c11; border: 1px solid #1c1f29; border-top: 3px solid var(--c); }
+.carte-cup.gagne { border-color: rgba(198,148,40,.55); border-top-color: var(--or); }
+/* fond : l'affiche floutée, pour que la carte reprenne ses couleurs */
+.carte-cup.avec-visuel::before { content: ""; position: absolute; inset: -40px; z-index: -1; background: var(--img) center / cover; filter: blur(40px) saturate(1.2); opacity: .28; }
+.carte-cup.avec-visuel::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(11,12,17,.35), rgba(11,12,17,.85) 45%); }
+.cup-visuel { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.cup-visuel img { display: block; width: 100%; }
+.cup-visuel .loupe { position: absolute; right: .6rem; bottom: .6rem; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: rgba(5,5,7,.75); color: #fff; font-size: .95rem; opacity: 0; transition: opacity .2s; }
+.cup-visuel:hover .loupe, .cup-visuel:focus-visible .loupe { opacity: 1; }
+/* affiche en hauteur : à gauche, entière, avec une marge et une ombre */
+.carte-cup.portrait { display: grid; grid-template-columns: clamp(150px, 26%, 240px) 1fr; gap: 1.6rem; padding: 1.4rem; }
+.carte-cup.portrait .cup-visuel img { border-radius: 8px; box-shadow: 0 18px 40px rgba(0,0,0,.6); }
+/* image large : bannière en haut */
+.carte-cup.large .cup-visuel { height: clamp(150px, 24vw, 240px); overflow: hidden; }
+.carte-cup.large .cup-visuel img { height: 100%; object-fit: cover; }
+.carte-cup.large .cup-visuel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 40%, #0b0c11); }
+.carte-cup.large .cup-corps, .carte-cup:not(.avec-visuel) .cup-corps { padding: 1.4rem; }
+.carte-cup.large .cup-corps { margin-top: -40px; position: relative; }
+.carte-cup.portrait .cup-corps { padding: .2rem 0; }
+.cup-corps { display: flex; flex-direction: column; gap: 1.2rem; min-width: 0; justify-content: space-between; }
+.cup-date { font-size: .78rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--or); }
+.cup-tete h3 { font: 700 clamp(1.6rem, 3vw, 2.2rem)/1.1 var(--display); margin-top: .35rem; text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+.cup-tete .orga { margin-top: .4rem; color: var(--gris); } .cup-tete .orga b { color: var(--blanc); }
+.cup-stats { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.1fr; gap: .6rem; }
+.cup-stats > div { display: flex; flex-direction: column; gap: .15rem; padding: .75rem .9rem; border-radius: 6px; background: rgba(5,5,7,.6); border: 1px solid rgba(255,255,255,.06); min-width: 0; }
+.cup-stats span { font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gris); }
+.cup-stats b { font: 700 1.25rem/1.2 var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cup-stats small { color: var(--gris); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stat-jeu b { color: var(--c); font-size: 1.05rem; }
+.stat-resultat b { font-size: 1.45rem; }
+.carte-cup.gagne .stat-resultat { background: linear-gradient(160deg, rgba(198,148,40,.28), rgba(5,5,7,.6)); border-color: rgba(198,148,40,.55); }
+.carte-cup.gagne .stat-resultat b { color: #f0cf7a; }
+.cup-equipe { display: flex; flex-direction: column; gap: .35rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.07); }
+.lab-cup { font-size: .68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gris); }
+.cup-equipe strong { font-size: 1.2rem; }
+.carte-cup.gagne .cup-equipe strong { color: #f0cf7a; }
+.cup-equipe .squad { margin-top: .3rem; }
+@media (max-width: 760px) {
+  .carte-cup.portrait { grid-template-columns: 1fr; padding: 1.1rem; }
+  .carte-cup.portrait .cup-visuel { width: min(240px, 70%); margin: 0 auto; }
+  .cup-stats { grid-template-columns: 1fr 1fr; }
+}
