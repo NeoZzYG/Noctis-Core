@@ -73,7 +73,7 @@
   const filet = '<div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>';
   const dateFr = (d, long) => d ? new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: long ? "long" : "short", year: "numeric" }) : "";
   const cle = (n) => (n || "").trim().toLowerCase();
-  let filtre = "";
+  let filtre = "", filtreFormat = "";
 
   function joueur(j) {
     const contenu = `${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : `<span class="ini">${esc((j.nom || "?").charAt(0))}</span>`}${esc(j.nom)}`;
@@ -81,24 +81,44 @@
   }
   function carte(p) {
     const t = themeJeu(p.jeu || p.tournoi), nbJ = p.nbJoueurs || p.participants;
-    return `<article class="tournoi-passe${p.place === 1 ? " gagne" : ""}${p.image ? " avec-image" : ""}" style="--c:${t.couleur}">
-      ${p.image ? `<div class="banniere-cup"><img src="${esc(p.image)}" alt="" loading="lazy"></div>` : ""}
-      <header>
-        <div><h3>${esc(p.tournoi)}</h3>
-          ${p.organisateur ? `<p class="orga">Organisé par <b>${esc(p.organisateur)}</b></p>` : ""}
-          <p class="meta"><span class="jeu-tag" style="--c:${t.couleur}">${esc(t.nom)}</span>
-            ${p.nbEquipes ? `<span>${p.nbEquipes} équipes</span>` : ""}${nbJ ? `<span>${nbJ} joueurs</span>` : ""}</p></div>
-        <span class="h-date">${dateFr(p.date, true)}</span>
-      </header>
-      <div class="notre-equipe">
-        <span class="medaille-cl">${medaille(p.place)}</span>
-        <div class="equipe">
-          <strong>${esc(p.equipe || "Équipe Noctis")}</strong><small>${texteResultat(p)}</small>
-          ${(p.joueurs || []).length ? `<div class="squad">${p.joueurs.map(joueur).join("")}</div>` : ""}
+    const nom = p.equipe || "Équipe Noctis";
+    return `<article class="tournoi-passe${p.place === 1 ? " gagne" : ""}${p.image ? " avec-image cup-large" : ""}" style="--c:${t.couleur}">
+      ${p.image ? `<button type="button" class="visuel-cup" data-zoom="${esc(p.image)}" aria-label="Agrandir l'affiche"><img src="${esc(p.image)}" alt="Affiche ${esc(p.tournoi)}" loading="lazy" onload="adapterCup(this)"></button>` : ""}
+      <div class="corps-cup">
+        <header>
+          <div><h3>${esc(p.tournoi)}</h3>
+            ${p.organisateur ? `<p class="orga">Organisé par <b>${esc(p.organisateur)}</b></p>` : ""}
+            <p class="meta"><span class="jeu-tag" style="--c:${t.couleur}">${esc(nomJeuComplet(p))}</span>
+              ${p.nbEquipes ? `<span>${p.nbEquipes} équipes</span>` : ""}${nbJ ? `<span>${nbJ} joueurs</span>` : ""}</p></div>
+          <span class="h-date">${dateFr(p.date, true)}</span>
+        </header>
+        <div class="notre-equipe">
+          <span class="medaille-cl">${medaille(p.place)}</span>
+          <div class="equipe">
+            <strong>${esc(nom)}</strong><small>${texteResultat(p)}</small>
+            ${(p.joueurs || []).length ? `<div class="squad">${p.joueurs.map(joueur).join("")}</div>` : ""}
+          </div>
         </div>
       </div>
     </article>`;
   }
+  // Affiche en hauteur : à côté du texte. Image large : en bannière.
+  window.adapterCup = (img) => {
+    const carte = img.closest(".tournoi-passe");
+    const portrait = img.naturalHeight > img.naturalWidth * 1.05;
+    carte.classList.toggle("cup-portrait", portrait);
+    carte.classList.toggle("cup-large", !portrait);
+  };
+  // Agrandir l'affiche au clic
+  zone.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-zoom]"); if (!b) return;
+    const v = document.createElement("div");
+    v.className = "visionneuse"; v.innerHTML = `<img src="${b.dataset.zoom}" alt=""><button type="button" aria-label="Fermer">✕</button>`;
+    const fermer = () => { v.remove(); removeEventListener("keydown", echap); };
+    const echap = (k) => { if (k.key === "Escape") fermer(); };
+    v.addEventListener("click", fermer); addEventListener("keydown", echap);
+    document.body.appendChild(v);
+  });
 
   function rendre() {
     const tout = [...(NOCTIS.palmares || [])].filter((p) => p.tournoi).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
@@ -114,7 +134,10 @@
       <div class="liste-tournois-passes">${histo.map(carte).join("")}</div>
     </div></section>`;
   }
-  zone.addEventListener("click", (e) => { const b = e.target.closest("[data-filtre]"); if (b) { filtre = b.dataset.filtre; rendre(); } });
+  zone.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-filtre]"); if (b) { filtre = b.dataset.filtre; rendre(); }
+    const f = e.target.closest("[data-format]"); if (f) { filtreFormat = f.dataset.format; rendre(); }
+  });
   Promise.all([initCompte(), chargerContenu()]).then(rendre);
 </script>
 </body></html>

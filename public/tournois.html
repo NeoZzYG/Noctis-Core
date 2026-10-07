@@ -154,7 +154,7 @@
         <tbody>${palm.map((p) => { const t = themeJeu(p.jeu || p.tournoi); return `<tr>
           <td>${p.date ? new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : "—"}</td>
           <td><strong>${esc(p.tournoi)}</strong></td><td>${esc(p.organisateur || "—")}</td>
-          <td><span class="jeu-tag" style="--c:${t.couleur}">${esc(t.nom)}</span></td>
+          <td><span class="jeu-tag" style="--c:${t.couleur}">${esc(nomJeuComplet(p))}</span></td>
           <td>${esc(p.equipe || "—")}</td>
           <td><span class="${p.place === 1 ? "vainqueur" : ""}">${p.place ? medaille(p.place) + " " : ""}${texteResultat(p)}</span></td></tr>`; }).join("")}</tbody></table></div>`
       : '<div class="palmares-vide"><b>Le trône est vide</b>Le premier champion Noctis reste à couronner. Ce sera peut-être toi.</div>';

@@ -91,20 +91,21 @@
         { k: "lien", l: "Lien de paiement (vide = « Bientôt »)", t: "text", ph: "https://buy.stripe.com/…", large: 1 },
         { k: "membres", l: "Réservé aux membres du serveur", t: "checkbox" }, { k: "images", l: "Photos (la 1re est la photo principale, 8 max)", t: "galerie" }] },
     palmares: { label: "Palmarès", aide: "Les cups auxquelles une équipe Noctis a participé : la cup, qui l'organisait, le jeu, le nombre d'équipes et de joueurs, notre équipe et ses joueurs. Les joueurs choisis dans la liste des membres sont reliés à leur profil.",
-      nouveau: () => ({ tournoi: "", organisateur: "", jeu: "", date: new Date().toISOString().slice(0, 10), nbEquipes: null, nbJoueurs: null, equipe: "", place: null, joueurs: [], image: "" }),
+      nouveau: () => ({ tournoi: "", organisateur: "", jeu: "", edition: "", type: "equipe", date: new Date().toISOString().slice(0, 10), nbEquipes: null, nbJoueurs: null, equipe: "", place: null, joueurs: [], image: "" }),
       apercu: (p) => p.tournoi ? `${p.tournoi}${p.place ? ` · ${medaille(p.place)}` : ""}${p.equipe ? ` · ${p.equipe}` : ""}` : "Nouvelle cup",
       champs: [{ k: "tournoi", l: "Nom de la cup", t: "text", ph: "Winter Cup 2026" }, { k: "organisateur", l: "Organisé par", t: "text", ph: "Nom de la structure" },
         { k: "jeu", l: "Jeu", t: "select", options: () => [["", "— Choisir —"], ...[...new Set([...JEUX_TOURNOIS, ...etat.jeux.map((j) => j.nom).filter(Boolean)])].map((j) => [j, j])] },
-        { k: "date", l: "Date", t: "date" }, { k: "nbEquipes", l: "Nombre d'équipes", t: "number" }, { k: "nbJoueurs", l: "Nombre de joueurs", t: "number" },
+        { k: "edition", l: "Version / mode du jeu (optionnel)", t: "edition", ph: "Black Ops 7, Warzone…" }, { k: "date", l: "Date", t: "date" },
+        { k: "nbEquipes", l: "Nombre d'équipes", t: "number" }, { k: "nbJoueurs", l: "Nombre de joueurs", t: "number" },
         { k: "equipe", l: "Nom de notre équipe", t: "text", ph: "Noctis Core" }, { k: "place", l: "Classement obtenu (optionnel)", t: "number", ph: "1 = vainqueur" },
         { k: "joueurs", l: "Joueurs de notre équipe", t: "joueurs" }, { k: "image", l: "Image de la cup (affiche ou bannière, format large idéal)", t: "image" }] },
     partenaires: { label: "Partenaires", aide: "Les structures partenaires, affichées sur la page Partenaires avec leur logo et le lien de leur Discord.",
       nouveau: () => ({ nom: "", logo: "", description: "", discord: "", site: "" }), apercu: (s) => s.nom || "Nouveau partenaire",
       champs: [{ k: "nom", l: "Nom de la structure", t: "text" }, { k: "discord", l: "Lien d'invitation Discord", t: "text", ph: "https://discord.gg/…" }, { k: "site", l: "Site ou réseau (optionnel)", t: "text", ph: "https://…" },
         { k: "description", l: "Présentation", t: "textarea", large: 1 }, { k: "logo", l: "Logo (carré, fond transparent idéal)", t: "image" }] },
-    streamers: { label: "Streamers", aide: "Les streamers Noctis et partenaires, affichés sur la page Streamers. Relie-les à leur compte du site pour reprendre leur photo et leur profil.",
-      nouveau: () => ({ nom: "", type: "noctis", plateforme: "twitch", lien: "", membre: "", membreId: "", avatar: "", description: "" }), apercu: (s) => `${s.nom || "Nouveau streamer"} · ${s.type === "partenaire" ? "Partenaire" : "Noctis"}`,
-      champs: [{ k: "nom", l: "Pseudo", t: "text" }, { k: "type", l: "Catégorie", t: "select", options: [["noctis", "Streamer Noctis"], ["partenaire", "Streamer partenaire"]] },
+    streamers: { label: "Streamers", aide: "Les streamers de la Noctis, affichés sur la page Streamers. Pour Twitch, le live s'affiche automatiquement sur le site quand ils sont en stream. Relie-les à leur compte du site pour reprendre leur photo et leur profil.",
+      nouveau: () => ({ nom: "", type: "noctis", plateforme: "twitch", lien: "", membre: "", membreId: "", avatar: "", description: "" }), apercu: (s) => `${s.nom || "Nouveau streamer"}${s.plateforme ? ` · ${s.plateforme.charAt(0).toUpperCase() + s.plateforme.slice(1)}` : ""}`,
+      champs: [{ k: "nom", l: "Pseudo", t: "text" },
         { k: "plateforme", l: "Plateforme", t: "select", options: [["twitch", "Twitch"], ["youtube", "YouTube"], ["tiktok", "TikTok"], ["kick", "Kick"]] },
         { k: "lien", l: "Lien de la chaîne", t: "text", ph: "https://www.twitch.tv/…", large: 1 }, { k: "membre", l: "Compte sur le site (optionnel)", t: "membre", lien: "membreId" },
         { k: "description", l: "Petite phrase (optionnel)", t: "text", ph: "Ranked LoL tous les soirs", large: 1 }, { k: "avatar", l: "Photo (optionnel : sinon celle de son compte)", t: "image" }] },
@@ -139,6 +140,10 @@
           <div class="img-boutons"><label class="btn btn-ghost">${v ? "Changer" : "Choisir une image"}<input type="file" accept="image/*" data-img data-i="${i}" data-k="${c.k}" hidden></label>
           ${v ? `<button type="button" class="btn btn-ghost" data-act="retirer" data-i="${i}" data-k="${c.k}">Retirer</button>` : ""}</div></div></div>`;
       case "membre": return `<label class="${cls}">${lab}<input type="text" list="liste-membres-site" ${attr} value="${esc(v || "")}" placeholder="Tape un pseudo du site…" autocomplete="off"></label>`;
+      case "edition": {
+        const p = etat[onglet][i], sugg = EDITIONS_JEUX[cleJeu(p.jeu)] || EDITIONS_JEUX[p.jeu] || [];
+        return `<label class="${cls}">${lab}<input type="text" list="editions-${i}" ${attr} value="${esc(v || "")}" placeholder="${esc(sugg.length ? sugg.slice(0, 2).join(", ") + "…" : c.ph || "")}" autocomplete="off"><datalist id="editions-${i}">${sugg.map((s) => `<option value="${esc(s)}">`).join("")}</datalist></label>`;
+      }
       case "joueurs": {
         const l = Array.isArray(v) ? v : [];
         return `<div class="champ large">${lab}<div class="chips">${l.map((j, m) => `<span class="chip${j.membreId ? " lie" : ""}" title="${j.membreId ? "Relié au profil" : "Pas de compte sur le site"}">${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : ""}${esc(j.nom)}<button type="button" data-act="jr-retirer" data-i="${i}" data-m="${m}" aria-label="Retirer ${esc(j.nom)}">×</button></span>`).join("")}
@@ -290,7 +295,11 @@
     ev.target.closest(".interrupteur-chantier").classList.toggle("actif", ev.target.checked);
     marquer();
   });
-  racine.addEventListener("change", (ev) => { if (ev.target.tagName === "SELECT") saisie(ev); });
+  racine.addEventListener("change", (ev) => {
+    if (ev.target.tagName !== "SELECT") return;
+    saisie(ev);
+    if (onglet === "palmares" && ev.target.dataset.k === "jeu") rendre();
+  });
 
   // Galerie : envoi de plusieurs photos d'un coup
   racine.addEventListener("change", async (ev) => {
@@ -381,7 +390,7 @@
     const avecId = (l) => (l || []).map((x) => ({ id: x.id || id(), ...x }));
     etat = {
       events: avecId(src.events), tournois: avecId(src.tournois), jeux: avecId(src.jeux), staff: avecId(src.staff),
-      produits: avecId(src.produits).map((p) => ({ tailles: "XS, S, M, L, XL, XXL, XXXL", description: "", ...p, images: p.images && p.images.length ? p.images : p.image ? [p.image] : [] })), palmares: avecId(src.palmares).map((p) => { const c = Array.isArray(p.classement) && p.classement[0]; return { organisateur: "", nbEquipes: null, nbJoueurs: p.participants || null, place: null, ...p, equipe: p.equipe || (c ? c.equipe : "") || "", joueurs: Array.isArray(p.joueurs) ? p.joueurs : c ? c.joueurs || [] : [] }; }), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
+      produits: avecId(src.produits).map((p) => ({ tailles: "XS, S, M, L, XL, XXL, XXXL", description: "", ...p, images: p.images && p.images.length ? p.images : p.image ? [p.image] : [] })), palmares: avecId(src.palmares).map((p) => { const c = Array.isArray(p.classement) && p.classement[0]; return { organisateur: "", edition: "", type: "equipe", nbEquipes: null, nbJoueurs: p.participants || null, place: null, ...p, equipe: p.equipe || (c ? c.equipe : "") || "", joueurs: Array.isArray(p.joueurs) ? p.joueurs : c ? c.joueurs || [] : [] }; }), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
       reglages: { boutiqueEnConstruction: true, ...(NOCTIS.reglages || {}), ...(src.reglages || {}) },
       partenaires: avecId(src.partenaires), streamers: avecId(src.streamers).map((s) => ({ membre: "", ...s })),
     };

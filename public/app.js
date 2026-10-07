@@ -275,4 +275,22 @@ function classementPalmares(p) {
   return [p.vainqueur, p.finaliste, p.troisieme].map((e, n) => ({ place: n + 1, equipe: e || "", joueurs: [] })).filter((r) => r.equipe);
 }
 const medaille = (place) => (place ? ["🥇", "🥈", "🥉"][place - 1] || `${place}e` : "⚔");
-const texteResultat = (p) => (p.place ? `${p.place === 1 ? "1re" : `${p.place}e`} place${p.nbEquipes ? ` sur ${p.nbEquipes}` : ""}` : "Participation");
+const texteResultat = (p) => { const total = p.type === "solo" ? p.nbJoueurs : p.nbEquipes; return p.place ? `${p.place === 1 ? "1re" : `${p.place}e`} place${total ? ` sur ${total}` : ""}` : "Participation"; };
+
+// Versions / modes proposés selon le jeu (palmarès). On peut aussi taper autre chose.
+const EDITIONS_JEUX = {
+  "Call of Duty": ["Black Ops 7", "Black Ops 6", "Modern Warfare 4", "Modern Warfare III", "Modern Warfare II", "Warzone", "Warzone Mobile", "Call of Duty: Mobile", "Vanguard", "Black Ops Cold War", "Modern Warfare (2019)", "Black Ops 4"],
+  "League of Legends": ["Faille de l'invocateur 5v5", "ARAM", "Arena", "Teamfight Tactics"],
+  "Valorant": ["Compétitif 5v5", "Premier", "Swiftplay"],
+  "Rocket League": ["3v3", "2v2", "1v1"],
+  "Fortnite": ["Battle Royale", "Zero Build", "Reload"],
+  "EA FC": ["EA FC 26", "EA FC 25", "Clubs Pro"],
+  "Counter-Strike 2": ["Compétitif 5v5", "Wingman 2v2"],
+};
+const nomJeuComplet = (p) => { const t = themeJeu(p.jeu || p.tournoi); return p.edition ? `${t.nom} · ${p.edition}` : t.nom; };
+
+// ============ LIVES TWITCH ============
+const loginTwitch = (url) => ((url || "").match(/twitch\.tv\/([A-Za-z0-9_]{3,25})/i) || [])[1] || "";
+async function chargerLives() {
+  try { const r = await fetch("/api/live"); return r.ok ? (await r.json()).live || {} : {}; } catch { return {}; }
+}

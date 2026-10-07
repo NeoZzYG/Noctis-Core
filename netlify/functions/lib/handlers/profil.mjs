@@ -13,6 +13,12 @@ function nettoyer(p, jeuxAutorises) {
     jeuxFavoris: (Array.isArray(p.jeuxFavoris) ? p.jeuxFavoris : []).map((j) => texte(j, 60)).filter((j) => jeuxAutorises.includes(j)).slice(0, 6),
     pseudos: { riot: texte(p.pseudos && p.pseudos.riot, 40), activision: texte(p.pseudos && p.pseudos.activision, 40), autre: texte(p.pseudos && p.pseudos.autre, 60) },
     reseaux: { twitch: lien(p.reseaux && p.reseaux.twitch), tiktok: lien(p.reseaux && p.reseaux.tiktok), youtube: lien(p.reseaux && p.reseaux.youtube) },
+    // résultats faits avec d'autres équipes (hors Noctis)
+    palmaresPerso: (Array.isArray(p.palmaresPerso) ? p.palmaresPerso : []).slice(0, 30).map((r) => ({
+      tournoi: texte(r.tournoi, 100), organisateur: texte(r.organisateur, 80), jeu: texte(r.jeu, 60), edition: texte(r.edition, 60),
+      date: /^\d{4}-\d{2}-\d{2}$/.test(r.date || "") ? r.date : "", equipe: texte(r.equipe, 80),
+      place: Number(r.place) > 0 ? Math.floor(Number(r.place)) : null, nbEquipes: Number(r.nbEquipes) > 0 ? Math.floor(Number(r.nbEquipes)) : null,
+    })).filter((r) => r.tournoi),
   };
 }
 
@@ -64,7 +70,9 @@ export const handler = async (event) => {
   // Palmarès : cups où le membre faisait partie de l'équipe Noctis
   const resultats = ((contenu && contenu.palmares) || [])
     .filter((t) => (t.joueurs || []).some((j) => j.membreId === id))
-    .map((t) => ({ tournoi: t.tournoi, organisateur: t.organisateur, jeu: t.jeu, date: t.date, place: t.place, equipe: t.equipe, nbEquipes: t.nbEquipes }));
+    .map((t) => ({ tournoi: t.tournoi, organisateur: t.organisateur, jeu: t.jeu, edition: t.edition, type: t.type, date: t.date, place: t.place, equipe: t.equipe, nbEquipes: t.nbEquipes }));
+  resultats.forEach((r) => (r.noctis = true));
+  ((profils[id] || {}).palmaresPerso || []).forEach((r) => resultats.push({ ...r, noctis: false }));
   resultats.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   stats.titres = resultats.filter((r) => r.place === 1).length;
   stats.podiums = resultats.filter((r) => r.place && r.place <= 3).length;

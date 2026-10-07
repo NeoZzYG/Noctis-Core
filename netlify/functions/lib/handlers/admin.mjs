@@ -23,11 +23,11 @@ const NETTOYEURS = {
     const ancien = Array.isArray(p.classement) && p.classement[0] ? p.classement[0] : null;
     const joueurs = (Array.isArray(p.joueurs) ? p.joueurs : ancien ? ancien.joueurs || [] : []).slice(0, 15)
       .map((j) => ({ membreId: chiffres(j.membreId), nom: texte(j.nom, 60), avatar: texte(j.avatar, 300) })).filter((j) => j.nom);
-    return { id: idSur(p.id), tournoi: texte(p.tournoi, 120), organisateur: texte(p.organisateur, 80), jeu: texte(p.jeu, 60), date: texte(p.date, 20),
+    return { id: idSur(p.id), tournoi: texte(p.tournoi, 120), organisateur: texte(p.organisateur, 80), jeu: texte(p.jeu, 60), edition: texte(p.edition, 60), date: texte(p.date, 20),
       nbEquipes: nombre(p.nbEquipes), nbJoueurs: nombre(p.nbJoueurs), equipe: texte(p.equipe || (ancien && ancien.equipe), 80), place: nombre(p.place), joueurs, image: texte(p.image, 300) };
   },
   partenaires: (s) => ({ id: idSur(s.id), nom: texte(s.nom, 80), logo: texte(s.logo, 300), description: texte(s.description, 500), discord: lienSur(s.discord), site: lienSur(s.site) }),
-  streamers: (s) => ({ id: idSur(s.id), nom: texte(s.nom, 60), type: s.type === "partenaire" ? "partenaire" : "noctis", plateforme: ["twitch", "youtube", "tiktok", "kick"].includes(s.plateforme) ? s.plateforme : "twitch",
+  streamers: (s) => ({ id: idSur(s.id), nom: texte(s.nom, 60), type: "noctis", plateforme: ["twitch", "youtube", "tiktok", "kick"].includes(s.plateforme) ? s.plateforme : "twitch",
     lien: lienSur(s.lien), membreId: texte(s.membreId, 25).replace(/[^0-9]/g, ""), avatar: texte(s.avatar, 300), description: texte(s.description, 200) }),
 };
 

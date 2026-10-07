@@ -112,8 +112,8 @@
         <section class="bloc-profil"><h2>Pseudos en jeu</h2>${pseudos ? `<ul class="pseudos">${pseudos}</ul>` : '<p class="vide-profil">Aucun pseudo renseigné.</p>'}</section>
         ${(p.palmares || []).length ? `<section class="bloc-profil large"><h2>Palmarès</h2><ul class="palmares-perso">${p.palmares.map((r) => { const t = themeJeu(r.jeu || r.tournoi); return `<li style="--c:${t.couleur}">
           <span class="medaille-cl">${medaille(r.place)}</span>
-          <span class="pp-tournoi"><strong>${esc(r.tournoi)}</strong><small>${esc(t.nom)}${r.organisateur ? ` · organisé par ${esc(r.organisateur)}` : ""}${r.equipe ? ` · avec ${esc(r.equipe)}` : ""} · ${texteResultat(r)}</small></span>
-          <span class="h-date">${r.date ? new Date(r.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : ""}</span></li>`; }).join("")}</ul><p class="lien-palmares"><a href="/palmares.html">Voir tout le palmarès →</a></p></section>` : ""}
+          <span class="pp-tournoi"><strong>${esc(r.tournoi)} ${r.noctis ? '<em class="badge-noctis">Noctis</em>' : '<em class="badge-perso">Perso</em>'}</strong><small>${esc(nomJeuComplet(r))}${r.organisateur ? ` · organisé par ${esc(r.organisateur)}` : ""}${r.equipe ? ` · avec ${esc(r.equipe)}` : r.noctis ? "" : " · en solo"} · ${texteResultat(r)}</small></span>
+          <span class="h-date">${r.date ? new Date(r.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : ""}</span></li>`; }).join("")}</ul><p class="lien-palmares"><a href="/palmares.html">Voir le palmarès de la Noctis →</a></p></section>` : ""}
         ${reseaux ? `<section class="bloc-profil large"><h2>Réseaux</h2><div class="reseaux">${reseaux}</div></section>` : ""}
       </div>
       <p class="actions-profil">
@@ -121,6 +121,20 @@
       </p>`;
   }
 
+  const jeuxConnus = () => [...new Set([...(NOCTIS.jeux || []).map((j) => j.nom), ...THEMES_JEUX.map((t) => t.nom)])].filter(Boolean);
+  function lignePalmares(r = {}) {
+    return `<div class="ligne-palmares">
+      <input type="text" data-pp="tournoi" placeholder="Nom de la cup" value="${esc(r.tournoi || "")}">
+      <input type="text" data-pp="organisateur" placeholder="Organisé par" value="${esc(r.organisateur || "")}">
+      <select data-pp="jeu"><option value="">Jeu</option>${jeuxConnus().map((j) => `<option${j === r.jeu ? " selected" : ""}>${esc(j)}</option>`).join("")}</select>
+      <input type="text" data-pp="edition" placeholder="Version (BO7, Warzone…)" value="${esc(r.edition || "")}" list="ed-pp">
+      <input type="date" data-pp="date" value="${esc(r.date || "")}">
+      <input type="text" data-pp="equipe" placeholder="Équipe (vide = solo)" value="${esc(r.equipe || "")}">
+      <input type="number" min="1" data-pp="place" placeholder="Place" value="${r.place || ""}">
+      <input type="number" min="1" data-pp="nbEquipes" placeholder="Sur combien d'équipes" value="${r.nbEquipes || ""}">
+      <button type="button" class="suppr-cl" data-act="suppr-palmares" aria-label="Retirer ce résultat">✕</button>
+    </div>`;
+  }
   function formulaire() {
     const p = P, coul = p.couleur || "#c69428";
     const noms = [...new Set([...(NOCTIS.jeux || []).map((j) => j.nom), ...THEMES_JEUX.map((t) => t.nom)])].filter(Boolean);
@@ -140,9 +154,15 @@
         <label class="champ"><span class="lab">Riot ID (LoL, Valorant)</span><input type="text" name="riot" maxlength="40" placeholder="Pseudo#EUW" value="${esc(p.pseudos?.riot || "")}"></label>
         <label class="champ"><span class="lab">Activision ID (CoD)</span><input type="text" name="activision" maxlength="40" placeholder="Pseudo#1234567" value="${esc(p.pseudos?.activision || "")}"></label>
         <label class="champ"><span class="lab">Autre pseudo</span><input type="text" name="autre" maxlength="60" placeholder="Epic, Steam, PSN…" value="${esc(p.pseudos?.autre || "")}"></label>
+        <fieldset class="champ large palmares-form"><legend class="lab">Mon palmarès perso (en solo ou avec une ancienne équipe)</legend>
+          <div id="lignes-palmares">${(p.palmaresPerso || []).map(lignePalmares).join("")}</div>
+          <button type="button" class="btn btn-ghost" data-act="ajout-palmares">+ Ajouter un résultat</button>
+          <small class="aide-form">Ces résultats apparaissent uniquement sur ton profil, pas sur la page Palmarès. Les cups jouées avec la Noctis s'ajoutent toutes seules.</small>
+        </fieldset>
         <label class="champ"><span class="lab">Twitch</span><input type="url" name="twitch" placeholder="https://www.twitch.tv/…" value="${esc(p.reseaux?.twitch || "")}"></label>
         <label class="champ"><span class="lab">TikTok</span><input type="url" name="tiktok" placeholder="https://www.tiktok.com/@…" value="${esc(p.reseaux?.tiktok || "")}"></label>
         <label class="champ"><span class="lab">YouTube</span><input type="url" name="youtube" placeholder="https://www.youtube.com/@…" value="${esc(p.reseaux?.youtube || "")}"></label>
+        <datalist id="ed-pp">${[...new Set(Object.values(EDITIONS_JEUX).flat())].map((e) => `<option value="${esc(e)}">`).join("")}</datalist>
         <p class="actions-profil large"><button type="submit" class="btn btn-or">Enregistrer</button><button type="button" class="btn btn-ghost" data-act="annuler">Annuler</button></p>
       </form>`;
     const f = document.getElementById("form-profil"), bio = f.bio, cpt = document.getElementById("compteur");
@@ -152,7 +172,9 @@
     });
     f.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const palmaresPerso = [...f.querySelectorAll(".ligne-palmares")].map((l) => Object.fromEntries([...l.querySelectorAll("[data-pp]")].map((x) => [x.dataset.pp, x.value.trim()]))).filter((r) => r.tournoi);
       const profil = {
+        palmaresPerso,
         bio: f.bio.value, couleur: f.couleur.value,
         jeuxFavoris: [...f.querySelectorAll("[name=jeux]:checked")].map((x) => x.value),
         pseudos: { riot: f.riot.value, activision: f.activision.value, autre: f.autre.value },
@@ -171,6 +193,8 @@
     if (b.dataset.copier) { navigator.clipboard?.writeText(b.dataset.copier); b.textContent = "Copié ✓"; setTimeout(() => (b.textContent = "Copier"), 1500); return; }
     switch (b.dataset.act) {
       case "editer": formulaire(); break;
+      case "ajout-palmares": document.getElementById("lignes-palmares").insertAdjacentHTML("beforeend", lignePalmares()); break;
+      case "suppr-palmares": b.closest(".ligne-palmares").remove(); break;
       case "annuler": vue(); break;
       case "reinit":
         if (!confirm(`Effacer la présentation, les jeux, les pseudos et les réseaux de ${P.nom} ?`)) return;

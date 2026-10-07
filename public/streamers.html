@@ -53,15 +53,18 @@
   <h1>Streamers</h1>
   <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
   <p class="devise">En live avec la Noctis</p>
-  <p class="intro-page">Les créateurs de la commu et nos streamers partenaires. Passe les soutenir en live.</p>
+  <p class="intro-page">Les créateurs de la commu. Quand ils sont en live sur Twitch, le stream s'affiche directement ici.</p>
+</section>
+<section class="bloc bloc-live" id="bloc-live" hidden>
+  <div class="wrap">
+    <div class="entete-bloc"><h2>En live maintenant</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise" id="nb-lives"></p></div>
+    <div class="lecteur-live" id="lecteur-live"></div>
+    <div class="autres-lives" id="autres-lives"></div>
+  </div>
 </section>
 <section class="bloc"><div class="wrap">
-  <div class="entete-bloc"><h2>Streamers Noctis</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">La team en live</p></div>
-  <ul class="grille-streamers" id="streamers-noctis"></ul>
-</div></section>
-<section class="bloc"><div class="wrap">
-  <div class="entete-bloc"><h2>Streamers partenaires</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">Ils soutiennent la Noctis</p></div>
-  <ul class="grille-streamers" id="streamers-partenaires"></ul>
+  <div class="entete-bloc"><h2>Streamers Noctis</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">La team</p></div>
+  <ul class="grille-streamers" id="streamers-noctis"><li class="events-vide">Chargement…</li></ul>
 </div></section>
 </main>
 <footer class="pied">
@@ -76,27 +79,65 @@
 <script src="/app.js"></script>
 <script>
   const PLATEFORMES = { twitch: ["Twitch", "#9146ff"], youtube: ["YouTube", "#ff3b3b"], tiktok: ["TikTok", "#25f4ee"], kick: ["Kick", "#53fc18"] };
+  let LIVES = {}, enCours = "";
+  const liveDe = (s) => (s.plateforme === "twitch" ? LIVES[loginTwitch(s.lien).toLowerCase()] : null);
+
   function carte(s) {
     const [nomP, couleur] = PLATEFORMES[s.plateforme] || PLATEFORMES.twitch;
-    const photo = s.avatar || s.avatarAuto;
-    return `<li class="streamer" style="--p:${couleur}">
+    const photo = s.avatar || s.avatarAuto, live = liveDe(s);
+    return `<li class="streamer${live ? " en-live" : ""}" style="--p:${couleur}">
+      ${live ? `<span class="badge-live">● EN LIVE · ${live.viewers}</span>` : ""}
       <div class="av-streamer">${photo ? `<img src="${esc(photo)}" alt="">` : `<span>${esc((s.nom || "?").charAt(0))}</span>`}</div>
       <span class="plateforme">${nomP}</span>
       <h3>${esc(s.nom)}</h3>
-      ${s.description ? `<p>${esc(s.description)}</p>` : ""}
+      ${live ? `<p class="titre-live">${esc(live.jeu || "")}</p>` : s.description ? `<p>${esc(s.description)}</p>` : ""}
       <div class="liens-streamer">
-        ${s.lien ? `<a class="btn btn-plateforme" href="${esc(s.lien)}" target="_blank" rel="noopener">Voir la chaîne</a>` : ""}
+        ${live ? `<button type="button" class="btn btn-plateforme" data-regarder="${esc(loginTwitch(s.lien))}">Regarder ici</button>` : s.lien ? `<a class="btn btn-plateforme" href="${esc(s.lien)}" target="_blank" rel="noopener">Voir la chaîne</a>` : ""}
         ${s.membreId ? `<a class="btn btn-ghost" href="/profil.html?id=${esc(s.membreId)}">Profil</a>` : ""}
       </div></li>`;
   }
-  Promise.all([initCompte(), chargerContenu()]).then(() => {
+
+  function lecteur(login) {
+    const s = (NOCTIS.streamers || []).find((x) => loginTwitch(x.lien).toLowerCase() === login.toLowerCase());
+    const live = LIVES[login.toLowerCase()]; if (!s || !live) return;
+    enCours = login;
+    document.getElementById("lecteur-live").innerHTML = `
+      <div class="ecran"><iframe src="https://player.twitch.tv/?channel=${encodeURIComponent(login)}&parent=${location.hostname}&muted=true&autoplay=true" allowfullscreen title="Live de ${esc(s.nom)}"></iframe></div>
+      <div class="infos-live">
+        <span class="badge-live">● EN LIVE</span>
+        <h3>${esc(s.nom)}</h3>
+        <p class="titre-stream">${esc(live.titre || "")}</p>
+        <p class="meta-live">${esc(live.jeu || "")}${live.viewers != null ? ` · ${live.viewers} spectateur${live.viewers > 1 ? "s" : ""}` : ""}</p>
+        <a class="btn btn-plateforme" style="--p:#9146ff" href="https://www.twitch.tv/${encodeURIComponent(login)}" target="_blank" rel="noopener">Ouvrir sur Twitch</a>
+      </div>`;
+    document.querySelectorAll("[data-live-choix]").forEach((b) => b.toggleAttribute("aria-current", b.dataset.liveChoix === login));
+  }
+
+  function rendre() {
     const l = NOCTIS.streamers || [];
-    const remplir = (id, type, vide) => {
-      const x = l.filter((s) => s.type === type);
-      document.getElementById(id).innerHTML = x.length ? x.map(carte).join("") : `<li class="events-vide">${vide}</li>`;
-    };
-    remplir("streamers-noctis", "noctis", "Les streamers de la Noctis arrivent bientôt.");
-    remplir("streamers-partenaires", "partenaire", "Les premiers streamers partenaires arrivent bientôt.");
+    const enLive = l.filter(liveDe);
+    document.getElementById("streamers-noctis").innerHTML = l.length
+      ? [...enLive, ...l.filter((s) => !liveDe(s))].map(carte).join("")
+      : '<li class="events-vide">Les streamers de la Noctis arrivent bientôt.</li>';
+    const bloc = document.getElementById("bloc-live");
+    bloc.hidden = !enLive.length;
+    if (enLive.length) {
+      document.getElementById("nb-lives").textContent = `${enLive.length} streamer${enLive.length > 1 ? "s" : ""} en direct`;
+      document.getElementById("autres-lives").innerHTML = enLive.length > 1 ? enLive.map((s) => { const lg = loginTwitch(s.lien); return `<button type="button" data-live-choix="${esc(lg)}">${s.avatar || s.avatarAuto ? `<img src="${esc(s.avatar || s.avatarAuto)}" alt="">` : ""}${esc(s.nom)} <small>${LIVES[lg.toLowerCase()].viewers}</small></button>`; }).join("") : "";
+      const garder = enLive.some((s) => loginTwitch(s.lien) === enCours);
+      if (!garder) lecteur(loginTwitch(enLive[0].lien));
+    }
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-regarder], [data-live-choix]"); if (!b) return;
+    lecteur(b.dataset.regarder || b.dataset.liveChoix);
+    document.getElementById("bloc-live").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  Promise.all([initCompte(), chargerContenu(), chargerLives()]).then(([, , lives]) => {
+    LIVES = lives; rendre();
+    // on revérifie les lives toutes les 2 minutes
+    setInterval(async () => { LIVES = await chargerLives(); rendre(); }, 120000);
   });
 </script>
 </body></html>

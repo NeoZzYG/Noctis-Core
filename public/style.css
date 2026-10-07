@@ -959,3 +959,60 @@ a.joueur:hover { border-color: var(--or); color: var(--blanc); }
 .banniere-cup::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 35%, #0b0c11); }
 .tournoi-passe.avec-image header { margin-top: -64px; position: relative; z-index: 1; background: none; border-bottom-color: #1c1f29; }
 .tournoi-passe.avec-image header h3 { text-shadow: 0 2px 14px #000; }
+
+/* Palmarès : image qui s'adapte (bannière ou affiche) */
+.tournoi-passe .corps-cup { min-width: 0; }
+.visuel-cup { display: block; width: 100%; padding: 0; border: 0; background: #050507; cursor: zoom-in; position: relative; overflow: hidden; }
+.visuel-cup img { display: block; width: 100%; }
+.tournoi-passe.cup-large .visuel-cup { height: clamp(150px, 22vw, 230px); }
+.tournoi-passe.cup-large .visuel-cup img { height: 100%; object-fit: cover; }
+.tournoi-passe.cup-large .visuel-cup::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 35%, #0b0c11); }
+.tournoi-passe.cup-large header { margin-top: -64px; position: relative; z-index: 1; background: none; }
+.tournoi-passe.cup-large header h3 { text-shadow: 0 2px 14px #000; }
+.tournoi-passe.cup-portrait { display: grid; grid-template-columns: clamp(130px, 22%, 210px) 1fr; }
+.tournoi-passe.cup-portrait .visuel-cup { height: 100%; min-height: 230px; border-right: 1px solid #1c1f29; }
+.tournoi-passe.cup-portrait .visuel-cup img { position: absolute; inset: 0; height: 100%; object-fit: cover; object-position: top; transition: transform .4s; }
+.tournoi-passe.cup-portrait .visuel-cup:hover img { transform: scale(1.04); }
+.tournoi-passe.cup-portrait header { margin-top: 0; }
+.format-tag { padding: .2rem .6rem; border-radius: 3px; font-size: .78rem; font-weight: 700; color: #cfd2da; border: 1px solid #2a2d38; }
+.filtres-format { margin-top: -.6rem; }
+.visionneuse { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 2rem; background: rgba(0,0,0,.88); backdrop-filter: blur(6px); cursor: zoom-out; }
+.visionneuse img { max-width: 100%; max-height: 100%; border-radius: 6px; box-shadow: 0 30px 80px rgba(0,0,0,.7); }
+.visionneuse button { position: absolute; top: 1.2rem; right: 1.2rem; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #3a3e4d; background: rgba(5,5,7,.8); color: #fff; font-size: 1.1rem; cursor: pointer; }
+@media (max-width: 600px) {
+  .tournoi-passe.cup-portrait { grid-template-columns: 1fr; }
+  .tournoi-passe.cup-portrait .visuel-cup { height: 260px; border-right: 0; border-bottom: 1px solid #1c1f29; }
+}
+
+/* ================= LIVES ================= */
+.badge-live { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .55rem; border-radius: 3px; font-size: .72rem; font-weight: 800; letter-spacing: .06em; background: #e91916; color: #fff; }
+.streamer .badge-live { position: absolute; top: .7rem; right: .7rem; }
+.streamer.en-live { border-color: rgba(233,25,22,.6); box-shadow: 0 0 0 1px rgba(233,25,22,.35), 0 12px 40px rgba(233,25,22,.15); }
+.streamer.en-live .av-streamer { background: #e91916; animation: pulse-live 2s infinite; }
+@keyframes pulse-live { 50% { box-shadow: 0 0 0 6px rgba(233,25,22,.15); } }
+.titre-live { color: #f0f0f5 !important; font-weight: 600; }
+.lecteur-live { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: 1.4rem; align-items: start; }
+.ecran { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid rgba(233,25,22,.5); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.ecran iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.infos-live { display: flex; flex-direction: column; gap: .7rem; padding: 1.2rem; border-radius: 8px; background: #0b0c11; border: 1px solid #1c1f29; }
+.infos-live .badge-live { width: fit-content; }
+.infos-live h3 { font: 700 1.8rem var(--display); }
+.titre-stream { color: #d7d9e0; line-height: 1.5; }
+.meta-live { color: var(--gris); font-size: .92rem; }
+.infos-live .btn { width: fit-content; }
+.autres-lives { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.autres-lives button { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .9rem .35rem .35rem; border-radius: 999px; border: 1px solid #2a2d38; background: #0b0c11; color: var(--blanc); font: 600 .9rem var(--texte); cursor: pointer; }
+.autres-lives button img { width: 28px; height: 28px; border-radius: 50%; }
+.autres-lives button small { color: #ff6b6b; }
+.autres-lives button[aria-current] { border-color: #e91916; background: rgba(233,25,22,.12); }
+.pastille-live { display: inline-flex; align-items: center; gap: .55rem; margin-top: 1rem; padding: .45rem 1rem; border-radius: 999px; background: rgba(233,25,22,.15); border: 1px solid rgba(233,25,22,.6); color: #fff; text-decoration: none; font-size: .95rem; }
+.pastille-live i { width: 9px; height: 9px; border-radius: 50%; background: #e91916; animation: clignote 1.4s infinite; }
+.pastille-live:hover { background: rgba(233,25,22,.25); }
+/* Profil : badges Noctis / Perso */
+.badge-noctis, .badge-perso { margin-left: .4rem; padding: .1rem .45rem; border-radius: 3px; font-size: .68rem; font-style: normal; font-weight: 700; vertical-align: middle; }
+.badge-noctis { color: #140e02; background: var(--or); } .badge-perso { color: #cfd2da; border: 1px solid #3a3e4d; }
+.palmares-form { display: flex; flex-direction: column; gap: .6rem; border: 0; padding: 0; }
+.ligne-palmares { display: grid; grid-template-columns: 1.4fr 1.1fr 1fr 1fr .9fr 1.1fr .55fr .8fr 34px; gap: .4rem; }
+.ligne-palmares input, .ligne-palmares select { min-width: 0; padding: .55rem .6rem; border-radius: 4px; border: 1px solid #262936; background: #050507; color: var(--blanc); font: 400 .9rem var(--texte); color-scheme: dark; }
+.aide-form { color: var(--gris); }
+@media (max-width: 960px) { .lecteur-live { grid-template-columns: 1fr; } .ligne-palmares { grid-template-columns: 1fr 1fr; } }

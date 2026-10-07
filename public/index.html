@@ -268,6 +268,14 @@
 
     rendreEvents();
 
+    // Streamers Noctis en live sur Twitch
+    chargerLives().then((lives) => {
+      const enLive = (NOCTIS.streamers || []).filter((s) => s.plateforme === "twitch" && lives[loginTwitch(s.lien).toLowerCase()]);
+      if (!enLive.length) return;
+      const texte = enLive.length === 1 ? `<b>${esc(enLive[0].nom)}</b> est en live` : `<b>${enLive.length} streamers</b> Noctis en live`;
+      document.getElementById("hero-actions").insertAdjacentHTML("afterend", `<a class="pastille-live" href="/streamers.html"><i></i>${texte} · Regarder</a>`);
+    });
+
     // Jeux
     const grille = document.getElementById("jeux");
     grille.innerHTML = NOCTIS.jeux.map((j) => `<li class="jeu${j.image ? "" : " sans-image"}" style="--c:${esc(j.couleur || "#c69428")}" data-jeu="${esc(j.nom)}">

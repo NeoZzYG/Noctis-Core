@@ -83,14 +83,18 @@ Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les
 
 ## Palmarès
 - Page **/palmares.html** (lien "Palmarès" dans le menu, à la place de l'ancien "Classement")
-- Historique des cups disputées par une équipe Noctis : nom de la cup, organisateur, jeu, nombre d'équipes et de joueurs, notre équipe, ses joueurs et le classement obtenu. Filtrable par jeu
+- Historique des cups disputées par la Noctis, en équipe ou en solo : nom de la cup, organisateur, jeu + version (ex. Call of Duty · Black Ops 7), nombre d'équipes et de joueurs, notre équipe ou le joueur, classement obtenu, image. Filtrable par jeu et par format
+- Image : une affiche en hauteur se place à gauche de la carte, une image large s'affiche en bannière. Clic sur l'image = affichage en grand
 - Admin → **Palmarès** : un joueur choisi dans la liste des membres du site est relié à son profil (ses cups et ses titres s'y affichent tout seuls)
 
 ## Partenaires et streamers
-- Pages **/partenaires.html** (logo, présentation, lien Discord, site) et **/streamers.html** (streamers Noctis et partenaires : plateforme, lien de chaîne, photo, profil)
+- Page **/partenaires.html** : logo, présentation, lien Discord, site
+- Page **/streamers.html** : les streamers Noctis. Ceux sur Twitch passent en tête avec le badge EN LIVE et le stream s'affiche directement sur le site (lecteur intégré). L'accueil affiche aussi « X est en live »
+- Lives Twitch : créer une appli gratuite sur https://dev.twitch.tv/console/apps (catégorie Website Integration, URL de redirection http://localhost) puis ajouter `TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET` (secret) dans Netlify
 - Tout se gère dans les onglets **Partenaires** et **Streamers** de l'admin
 
 ## Profils des membres
+- Palmarès perso : chaque membre ajoute dans son profil les cups faites avec d'autres équipes (badge Perso). Les cups Noctis s'ajoutent toutes seules (badge Noctis)
 - Chaque membre personnalise son profil (bouton "Personnaliser mon profil") : présentation, couleur, jeux favoris, Riot ID / Activision ID, réseaux (Twitch, TikTok, YouTube)
 - Le pseudo et la photo viennent de Discord
 - Les profils des autres se voient via `/profil.html?id=...` (liens depuis le staff et l'onglet Membres de l'admin)
