@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Boutique - Noctis Core</title>
+<title>Partenaires · Noctis Core</title>
 <meta name="theme-color" content="#c69428">
 <link rel="icon" href="/assets/favicon.png">
 <!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
-<meta name="description" content="Le merch officiel Noctis Core : t-shirts, hoodies et maillots d'équipe.">
+<meta name="description" content="Les structures partenaires de Noctis Core.">
 <meta property="og:site_name" content="Noctis Core">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Boutique · Noctis Core">
-<meta property="og:description" content="Le merch officiel Noctis Core : t-shirts, hoodies et maillots d'équipe.">
-<meta property="og:url" content="https://noctis-core.com/boutique.html">
+<meta property="og:title" content="Partenaires · Noctis Core">
+<meta property="og:description" content="Les structures partenaires de Noctis Core.">
+<meta property="og:url" content="https://noctis-core.com/partenaires.html">
 <meta property="og:image" content="https://noctis-core.com/assets/og-image.jpg">
 <meta property="og:image:width" content="1500">
 <meta property="og:image:height" content="597">
@@ -33,8 +33,8 @@
       <a href="/" >Accueil</a>
       <a href="/tournois.html">Tournois</a>
       <a href="/palmares.html">Palmarès</a>
-      <a href="/boutique.html" aria-current="page">Boutique</a>
-      <a href="/partenaires.html">Partenaires</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html" aria-current="page">Partenaires</a>
       <a href="/streamers.html">Streamers</a>
     </nav>
     <div id="compte"></div>
@@ -44,23 +44,18 @@
   <a href="/" >Accueil</a>
   <a href="/tournois.html">Tournois</a>
   <a href="/palmares.html">Palmarès</a>
-  <a href="/boutique.html" aria-current="page">Boutique</a>
-      <a href="/partenaires.html">Partenaires</a>
+  <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html" aria-current="page">Partenaires</a>
       <a href="/streamers.html">Streamers</a>
 </nav>
 <main>
 <section class="page-tete">
-  <h1>Boutique</h1>
+  <h1>Partenaires</h1>
   <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
-  <p class="devise">Porte les couleurs</p>
-  <p class="intro-page">Le merch officiel Noctis Core. Certaines pièces sont réservées aux membres du serveur.</p>
+  <p class="devise">Ils nous font confiance</p>
+  <p class="intro-page">Les structures qui avancent avec la Noctis. Passe leur dire bonjour sur leur Discord.</p>
 </section>
-<section class="bloc bloc-boutique">
-  <div class="wrap">
-    <p class="chantier grand" id="chantier-boutique" hidden><span>🚧</span> La boutique est en cours de construction. Les articles arrivent très bientôt, reste connecté !</p>
-    <ul class="produits" id="produits"></ul>
-  </div>
-</section>
+<section class="bloc"><div class="wrap"><ul class="grille-partenaires" id="partenaires"><li class="events-vide">Chargement…</li></ul></div></section>
 </main>
 <footer class="pied">
   <div class="wrap">
@@ -72,23 +67,17 @@
   </div>
 </footer>
 <script src="/app.js"></script>
-
 <script>
   Promise.all([initCompte(), chargerContenu()]).then(() => {
-    const chantier = Boolean(NOCTIS.reglages && NOCTIS.reglages.boutiqueEnConstruction);
-    document.getElementById("chantier-boutique").hidden = !chantier;
-    const liste = document.getElementById("produits");
-    liste.classList.toggle("en-construction", chantier);
-    liste.innerHTML = NOCTIS.produits.map((p) => {
-      const a = actionProduit(p), photos = photosProduit(p);
-      return `<li class="produit">
-        <a class="visuel" href="${lienProduit(p)}"><img src="${esc(photos[0] || "/assets/logo.png")}" alt="${esc(p.nom)}" loading="lazy">
-          ${photos.length > 1 ? `<span class="nb-photos">${photos.length} photos</span>` : ""}</a>
-        <h2><a href="${lienProduit(p)}">${esc(p.nom)}</a></h2>
-        <div class="ligne"><span class="prix">${eur(p.prix)}</span><a class="btn btn-ghost" href="${lienProduit(p)}">Voir</a></div>
-        ${a.note ? `<p class="note">${a.note}</p>` : ""}
-      </li>`;
-    }).join("") || '<li class="events-vide">Aucun article pour le moment.</li>';
+    const l = NOCTIS.partenaires || [];
+    document.getElementById("partenaires").innerHTML = l.length ? l.map((s) => `<li class="partenaire">
+      <div class="logo-partenaire">${s.logo ? `<img src="${esc(s.logo)}" alt="Logo ${esc(s.nom)}">` : `<span>${esc((s.nom || "?").charAt(0))}</span>`}</div>
+      <h2>${esc(s.nom)}</h2>
+      ${s.description ? `<p>${esc(s.description)}</p>` : ""}
+      <div class="liens-partenaire">
+        ${s.discord ? `<a class="btn btn-or" href="${esc(s.discord)}" target="_blank" rel="noopener">${DISCORD_SVG}Rejoindre leur Discord</a>` : ""}
+        ${s.site ? `<a class="btn btn-ghost" href="${esc(s.site)}" target="_blank" rel="noopener">Voir leur site</a>` : ""}
+      </div></li>`).join("") : '<li class="events-vide">Les premiers partenaires de la Noctis arrivent bientôt.</li>';
   });
 </script>
 </body></html>

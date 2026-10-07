@@ -61,8 +61,17 @@ export const handler = async (event) => {
     events: ((contenu && contenu.events) || []).filter(passe).length,
   };
 
+  // Palmarès : cups où le membre faisait partie de l'équipe Noctis
+  const resultats = ((contenu && contenu.palmares) || [])
+    .filter((t) => (t.joueurs || []).some((j) => j.membreId === id))
+    .map((t) => ({ tournoi: t.tournoi, organisateur: t.organisateur, jeu: t.jeu, date: t.date, place: t.place, equipe: t.equipe, nbEquipes: t.nbEquipes }));
+  resultats.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  stats.titres = resultats.filter((r) => r.place === 1).length;
+  stats.podiums = resultats.filter((r) => r.place && r.place <= 3).length;
+  stats.cups = resultats.length;
+
   return json(200, {
-    profil: { id, nom: m.nom, username: m.username, avatar: m.avatar, derniereVisite: m.derniereVisite || null, arrivee, stats, ...(profils[id] || {}) },
+    profil: { id, nom: m.nom, username: m.username, avatar: m.avatar, derniereVisite: m.derniereVisite || null, arrivee, stats, palmares: resultats, ...(profils[id] || {}) },
     moi, admin,
     banni: admin ? bannis[id] || null : undefined,
   });

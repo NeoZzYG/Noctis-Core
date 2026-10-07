@@ -32,8 +32,10 @@
     <nav class="nav" aria-label="Navigation principale">
       <a href="/" >Accueil</a>
       <a href="/tournois.html" >Tournois</a>
-      <a href="/classement.html" >Classement</a>
+      <a href="/palmares.html">Palmarès</a>
       <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html">Streamers</a>
     </nav>
     <div id="compte"></div>
   </div>
@@ -41,8 +43,10 @@
 <nav class="nav-mobile" aria-label="Navigation mobile">
   <a href="/" >Accueil</a>
   <a href="/tournois.html" >Tournois</a>
-  <a href="/classement.html" >Classement</a>
+  <a href="/palmares.html">Palmarès</a>
   <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html">Streamers</a>
 </nav>
 <main>
 <div class="wrap" id="contenu"><p class="vide">Chargement du profil…</p></div>
@@ -100,11 +104,16 @@
         <div><dt>Membre depuis</dt><dd>${depuisLe}</dd></div>
         <div><dt>Tournois joués</dt><dd>${p.stats?.tournois || 0}</dd></div>
         <div><dt>Events rejoints</dt><dd>${p.stats?.events || 0}</dd></div>
+        <div><dt>Cups disputées</dt><dd>${p.stats?.cups || 0}${p.stats?.titres ? ` <small>· ${p.stats.titres} titre${p.stats.titres > 1 ? "s" : ""}</small>` : ""}</dd></div>
       </dl>
       <div class="profil-grille" style="--acc:${esc(coul)}">
         <section class="bloc-profil large"><h2>À propos</h2>${p.bio ? `<p class="bio">${esc(p.bio)}</p>` : `<p class="vide-profil">${INFO.moi ? "Présente-toi en quelques mots : clique sur « Personnaliser mon profil »." : "Pas encore de présentation."}</p>`}</section>
         <section class="bloc-profil"><h2>Jeux favoris</h2>${jeux ? `<div class="puces-jeux">${jeux}</div>` : '<p class="vide-profil">Aucun jeu choisi.</p>'}</section>
         <section class="bloc-profil"><h2>Pseudos en jeu</h2>${pseudos ? `<ul class="pseudos">${pseudos}</ul>` : '<p class="vide-profil">Aucun pseudo renseigné.</p>'}</section>
+        ${(p.palmares || []).length ? `<section class="bloc-profil large"><h2>Palmarès</h2><ul class="palmares-perso">${p.palmares.map((r) => { const t = themeJeu(r.jeu || r.tournoi); return `<li style="--c:${t.couleur}">
+          <span class="medaille-cl">${medaille(r.place)}</span>
+          <span class="pp-tournoi"><strong>${esc(r.tournoi)}</strong><small>${esc(t.nom)}${r.organisateur ? ` · organisé par ${esc(r.organisateur)}` : ""}${r.equipe ? ` · avec ${esc(r.equipe)}` : ""} · ${texteResultat(r)}</small></span>
+          <span class="h-date">${r.date ? new Date(r.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" }) : ""}</span></li>`; }).join("")}</ul><p class="lien-palmares"><a href="/palmares.html">Voir tout le palmarès →</a></p></section>` : ""}
         ${reseaux ? `<section class="bloc-profil large"><h2>Réseaux</h2><div class="reseaux">${reseaux}</div></section>` : ""}
       </div>
       <p class="actions-profil">

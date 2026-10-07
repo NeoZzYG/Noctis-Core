@@ -20,8 +20,10 @@
     <nav class="nav" aria-label="Navigation principale">
       <a href="/" >Accueil</a>
       <a href="/tournois.html">Tournois</a>
-      <a href="/classement.html" >Classement</a>
+      <a href="/palmares.html">Palmarès</a>
       <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html">Streamers</a>
     </nav>
     <div id="compte"></div>
   </div>
@@ -29,8 +31,10 @@
 <nav class="nav-mobile" aria-label="Navigation mobile">
   <a href="/" >Accueil</a>
   <a href="/tournois.html">Tournois</a>
-  <a href="/classement.html" >Classement</a>
+  <a href="/palmares.html">Palmarès</a>
   <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html">Streamers</a>
 </nav>
 <main>
 <section class="page-tete page-tete-admin">
@@ -86,10 +90,24 @@
         { k: "description", l: "Description (matière, coupe, détails…)", t: "textarea", large: 1 },
         { k: "lien", l: "Lien de paiement (vide = « Bientôt »)", t: "text", ph: "https://buy.stripe.com/…", large: 1 },
         { k: "membres", l: "Réservé aux membres du serveur", t: "checkbox" }, { k: "images", l: "Photos (la 1re est la photo principale, 8 max)", t: "galerie" }] },
-    palmares: { label: "Palmarès", aide: "Ajoute une ligne à la fin de chaque tournoi. Le nombre de tournois sur l'accueil se calcule tout seul.",
-      nouveau: () => ({ tournoi: "", jeu: JEUX_TOURNOIS[0] || "", date: new Date().toISOString().slice(0, 10), vainqueur: "", finaliste: "", participants: null }), apercu: (p) => p.tournoi ? `${p.tournoi} · 🏆 ${p.vainqueur || "?"}` : "Nouveau résultat",
-      champs: [{ k: "tournoi", l: "Tournoi", t: "text" }, { k: "jeu", l: "Jeu", t: "select", options: () => JEUX_TOURNOIS.map((j) => [j, j]) }, { k: "date", l: "Date", t: "date" },
-        { k: "vainqueur", l: "Vainqueur", t: "text" }, { k: "finaliste", l: "Finaliste", t: "text" }, { k: "participants", l: "Nombre de joueurs", t: "number" }] },
+    palmares: { label: "Palmarès", aide: "Les cups auxquelles une équipe Noctis a participé : la cup, qui l'organisait, le jeu, le nombre d'équipes et de joueurs, notre équipe et ses joueurs. Les joueurs choisis dans la liste des membres sont reliés à leur profil.",
+      nouveau: () => ({ tournoi: "", organisateur: "", jeu: "", date: new Date().toISOString().slice(0, 10), nbEquipes: null, nbJoueurs: null, equipe: "", place: null, joueurs: [], image: "" }),
+      apercu: (p) => p.tournoi ? `${p.tournoi}${p.place ? ` · ${medaille(p.place)}` : ""}${p.equipe ? ` · ${p.equipe}` : ""}` : "Nouvelle cup",
+      champs: [{ k: "tournoi", l: "Nom de la cup", t: "text", ph: "Winter Cup 2026" }, { k: "organisateur", l: "Organisé par", t: "text", ph: "Nom de la structure" },
+        { k: "jeu", l: "Jeu", t: "select", options: () => [["", "— Choisir —"], ...[...new Set([...JEUX_TOURNOIS, ...etat.jeux.map((j) => j.nom).filter(Boolean)])].map((j) => [j, j])] },
+        { k: "date", l: "Date", t: "date" }, { k: "nbEquipes", l: "Nombre d'équipes", t: "number" }, { k: "nbJoueurs", l: "Nombre de joueurs", t: "number" },
+        { k: "equipe", l: "Nom de notre équipe", t: "text", ph: "Noctis Core" }, { k: "place", l: "Classement obtenu (optionnel)", t: "number", ph: "1 = vainqueur" },
+        { k: "joueurs", l: "Joueurs de notre équipe", t: "joueurs" }, { k: "image", l: "Image de la cup (affiche ou bannière, format large idéal)", t: "image" }] },
+    partenaires: { label: "Partenaires", aide: "Les structures partenaires, affichées sur la page Partenaires avec leur logo et le lien de leur Discord.",
+      nouveau: () => ({ nom: "", logo: "", description: "", discord: "", site: "" }), apercu: (s) => s.nom || "Nouveau partenaire",
+      champs: [{ k: "nom", l: "Nom de la structure", t: "text" }, { k: "discord", l: "Lien d'invitation Discord", t: "text", ph: "https://discord.gg/…" }, { k: "site", l: "Site ou réseau (optionnel)", t: "text", ph: "https://…" },
+        { k: "description", l: "Présentation", t: "textarea", large: 1 }, { k: "logo", l: "Logo (carré, fond transparent idéal)", t: "image" }] },
+    streamers: { label: "Streamers", aide: "Les streamers Noctis et partenaires, affichés sur la page Streamers. Relie-les à leur compte du site pour reprendre leur photo et leur profil.",
+      nouveau: () => ({ nom: "", type: "noctis", plateforme: "twitch", lien: "", membre: "", membreId: "", avatar: "", description: "" }), apercu: (s) => `${s.nom || "Nouveau streamer"} · ${s.type === "partenaire" ? "Partenaire" : "Noctis"}`,
+      champs: [{ k: "nom", l: "Pseudo", t: "text" }, { k: "type", l: "Catégorie", t: "select", options: [["noctis", "Streamer Noctis"], ["partenaire", "Streamer partenaire"]] },
+        { k: "plateforme", l: "Plateforme", t: "select", options: [["twitch", "Twitch"], ["youtube", "YouTube"], ["tiktok", "TikTok"], ["kick", "Kick"]] },
+        { k: "lien", l: "Lien de la chaîne", t: "text", ph: "https://www.twitch.tv/…", large: 1 }, { k: "membre", l: "Compte sur le site (optionnel)", t: "membre", lien: "membreId" },
+        { k: "description", l: "Petite phrase (optionnel)", t: "text", ph: "Ranked LoL tous les soirs", large: 1 }, { k: "avatar", l: "Photo (optionnel : sinon celle de son compte)", t: "image" }] },
     reglement: { label: "Règlement", aide: "Les règles affichées en bas de la page Tournois, une par ligne.",
       nouveau: () => ({ texte: "" }), apercu: (r, i) => `Règle ${i + 1}`, champs: [{ k: "texte", l: "Règle", t: "textarea", large: 1 }] },
   };
@@ -120,6 +138,26 @@
           <div class="img-apercu">${v ? `<img src="${esc(v)}" alt="">` : "<span>Aucune image</span>"}</div>
           <div class="img-boutons"><label class="btn btn-ghost">${v ? "Changer" : "Choisir une image"}<input type="file" accept="image/*" data-img data-i="${i}" data-k="${c.k}" hidden></label>
           ${v ? `<button type="button" class="btn btn-ghost" data-act="retirer" data-i="${i}" data-k="${c.k}">Retirer</button>` : ""}</div></div></div>`;
+      case "membre": return `<label class="${cls}">${lab}<input type="text" list="liste-membres-site" ${attr} value="${esc(v || "")}" placeholder="Tape un pseudo du site…" autocomplete="off"></label>`;
+      case "joueurs": {
+        const l = Array.isArray(v) ? v : [];
+        return `<div class="champ large">${lab}<div class="chips">${l.map((j, m) => `<span class="chip${j.membreId ? " lie" : ""}" title="${j.membreId ? "Relié au profil" : "Pas de compte sur le site"}">${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : ""}${esc(j.nom)}<button type="button" data-act="jr-retirer" data-i="${i}" data-m="${m}" aria-label="Retirer ${esc(j.nom)}">×</button></span>`).join("")}
+          <input type="text" class="ajout-joueur" list="liste-membres-site" data-jr="ajout" data-i="${i}" placeholder="+ Ajouter un joueur (Entrée)" autocomplete="off"></div></div>`;
+      }
+      case "classement": {
+        const l = Array.isArray(v) ? v : [];
+        return `<div class="champ large champ-classement">${lab}
+          ${l.map((r, n) => `<div class="ligne-classement">
+            <span class="place-cl">${medaille(n + 1)}</span>
+            <div class="cl-contenu">
+              <input type="text" data-cl="equipe" data-i="${i}" data-n="${n}" value="${esc(r.equipe || "")}" placeholder="Nom de l'équipe (ou du joueur en solo)">
+              <div class="chips">${(r.joueurs || []).map((j, m) => `<span class="chip${j.membreId ? " lie" : ""}" title="${j.membreId ? "Relié au profil" : "Pas de compte sur le site"}">${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : ""}${esc(j.nom)}<button type="button" data-act="cl-retirer" data-i="${i}" data-n="${n}" data-m="${m}" aria-label="Retirer ${esc(j.nom)}">×</button></span>`).join("")}
+                <input type="text" class="ajout-joueur" list="liste-membres-site" data-cl="joueur" data-i="${i}" data-n="${n}" placeholder="+ Ajouter un joueur (Entrée)" autocomplete="off"></div>
+            </div>
+            <button type="button" class="suppr-cl" data-act="cl-suppr" data-i="${i}" data-n="${n}" aria-label="Retirer cette place">✕</button>
+          </div>`).join("")}
+          <button type="button" class="btn btn-ghost ajout-place" data-act="cl-ajouter" data-i="${i}">+ Ajouter une place</button></div>`;
+      }
       case "galerie": {
         const l = Array.isArray(v) ? v : [];
         return `<div class="${cls} large champ-galerie">${lab}<div class="galerie-admin">
@@ -209,6 +247,7 @@
         <ul id="res-membres" class="res-membres"></ul>
       </div>` : ""}
       <div class="cartes-admin">${liste.length ? liste.map((it, i) => carte(it, i, liste.length)).join("") : '<p class="events-vide">Rien pour l\'instant. Clique sur « + Ajouter ».</p>'}</div>
+      <datalist id="liste-membres-site">${(MEMBRES || []).filter((m) => !m.banni).map((m) => `<option value="${esc(valeurMembre(m))}">`).join("")}</datalist>
       <datalist id="liste-jeux">${noms.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>
       <div class="barre-enregistrer${modifie ? " visible" : ""}">
         <span id="statut">${modifie ? "Modifications non enregistrées" : esc(majInfo)}</span>
@@ -228,7 +267,7 @@
   // Saisie dans les champs
   const saisie = (ev) => {
     const el = ev.target, i = el.dataset.i, k = el.dataset.k;
-    if (i == null || !k || el.dataset.img != null) return;
+    if (i == null || !k || el.dataset.img != null || el.dataset.cl || el.dataset.jr) return;
     const c = SCHEMA[onglet].champs.find((x) => x.k === k);
     let v = el.type === "checkbox" ? el.checked : el.value;
     if (onglet === "jeux" && k === "nom") {
@@ -237,6 +276,7 @@
     }
     if (c.t === "number") v = el.value === "" ? null : Number(el.value);
     if (c.t === "datetime") v = versISO(el.value);
+    if (c.t === "membre") { const m = trouverMembre(el.value); etat[onglet][i][c.lien] = m ? m.id : ""; if (m) { v = m.nom; el.value = m.nom; } }
     etat[onglet][i][k] = v;
     if (c.t === "color") el.nextElementSibling.textContent = el.value;
     const ap = racine.querySelector(`[data-apercu="${i}"]`);
@@ -300,7 +340,7 @@
     const b = ev.target.closest("button");
     if (!b) return;
     if (b.dataset.onglet) { onglet = b.dataset.onglet; rendre(); return; }
-    if (b.dataset.ban || b.dataset.ajoutMembre) return;
+    if (b.dataset.ban || b.dataset.ajoutMembre || (b.dataset.act || "").startsWith("cl-") || b.dataset.act === "jr-retirer") return;
     const liste = etat[onglet], i = Number(b.dataset.i);
     switch (b.dataset.act) {
       case "ajouter": liste.unshift({ id: id(), ...SCHEMA[onglet].nouveau() }); modifie = true; rendre(); racine.querySelector(".carte-admin input, .carte-admin textarea")?.focus(); break;
@@ -341,11 +381,66 @@
     const avecId = (l) => (l || []).map((x) => ({ id: x.id || id(), ...x }));
     etat = {
       events: avecId(src.events), tournois: avecId(src.tournois), jeux: avecId(src.jeux), staff: avecId(src.staff),
-      produits: avecId(src.produits).map((p) => ({ tailles: "XS, S, M, L, XL, XXL, XXXL", description: "", ...p, images: p.images && p.images.length ? p.images : p.image ? [p.image] : [] })), palmares: avecId(src.palmares), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
+      produits: avecId(src.produits).map((p) => ({ tailles: "XS, S, M, L, XL, XXL, XXXL", description: "", ...p, images: p.images && p.images.length ? p.images : p.image ? [p.image] : [] })), palmares: avecId(src.palmares).map((p) => { const c = Array.isArray(p.classement) && p.classement[0]; return { organisateur: "", nbEquipes: null, nbJoueurs: p.participants || null, place: null, ...p, equipe: p.equipe || (c ? c.equipe : "") || "", joueurs: Array.isArray(p.joueurs) ? p.joueurs : c ? c.joueurs || [] : [] }; }), reglement: (src.reglement || []).map((t) => ({ id: id(), texte: t })),
       reglages: { boutiqueEnConstruction: true, ...(NOCTIS.reglages || {}), ...(src.reglages || {}) },
+      partenaires: avecId(src.partenaires), streamers: avecId(src.streamers).map((s) => ({ membre: "", ...s })),
     };
     if (src.majLe) majInfo = `Dernière mise à jour le ${new Date(src.majLe).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}${src.majPar ? ` par ${src.majPar}` : ""}`;
   }
+
+  // ----- Classement du palmarès -----
+  const valeurMembre = (m) => `${m.nom}${m.username ? ` (@${m.username})` : ""}`;
+  function trouverMembre(txt) {
+    const t = (txt || "").trim().toLowerCase();
+    if (!t || !MEMBRES) return null;
+    return MEMBRES.find((m) => valeurMembre(m).toLowerCase() === t) || MEMBRES.find((m) => (m.nom || "").toLowerCase() === t || (m.username || "").toLowerCase() === t) || null;
+  }
+  function ajouterJoueur(el) {
+    const txt = el.value.trim(); if (!txt) return;
+    const r = etat[onglet][el.dataset.i].classement[el.dataset.n];
+    const m = trouverMembre(txt);
+    const j = m ? { membreId: m.id, nom: m.nom, avatar: m.avatar } : { membreId: "", nom: txt, avatar: "" };
+    if (!r.joueurs.some((x) => (j.membreId && x.membreId === j.membreId) || x.nom === j.nom)) r.joueurs.push(j);
+    modifie = true; rendre();
+    const champ = racine.querySelector(`[data-cl="joueur"][data-i="${el.dataset.i}"][data-n="${el.dataset.n}"]`); if (champ) champ.focus();
+  }
+  racine.addEventListener("input", (ev) => {
+    const el = ev.target;
+    if (el.dataset.cl === "equipe") {
+      etat[onglet][el.dataset.i].classement[el.dataset.n].equipe = el.value; marquer();
+      const ap = racine.querySelector(`[data-apercu="${el.dataset.i}"]`); if (ap) ap.textContent = SCHEMA[onglet].apercu(etat[onglet][el.dataset.i], Number(el.dataset.i));
+    }
+    // choix dans la liste des membres : ajout direct
+    if (el.dataset.cl === "joueur" && ev.inputType !== "insertText" && trouverMembre(el.value)) ajouterJoueur(el);
+  });
+  racine.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" && ev.target.dataset.cl === "joueur") { ev.preventDefault(); ajouterJoueur(ev.target); }
+    if (ev.key === "Enter" && ev.target.dataset.jr) { ev.preventDefault(); ajouterJoueurEquipe(ev.target); }
+  });
+  // Joueurs de notre équipe (palmarès)
+  function ajouterJoueurEquipe(el) {
+    const txt = el.value.trim(); if (!txt) return;
+    const p = etat[onglet][el.dataset.i]; p.joueurs = Array.isArray(p.joueurs) ? p.joueurs : [];
+    const m = trouverMembre(txt);
+    const j = m ? { membreId: m.id, nom: m.nom, avatar: m.avatar } : { membreId: "", nom: txt, avatar: "" };
+    if (!p.joueurs.some((x) => (j.membreId && x.membreId === j.membreId) || x.nom === j.nom)) p.joueurs.push(j);
+    modifie = true; rendre();
+    const champ = racine.querySelector(`[data-jr][data-i="${el.dataset.i}"]`); if (champ) champ.focus();
+  }
+  racine.addEventListener("input", (ev) => { if (ev.target.dataset.jr && ev.inputType !== "insertText" && trouverMembre(ev.target.value)) ajouterJoueurEquipe(ev.target); });
+  racine.addEventListener("click", (ev) => {
+    const b = ev.target.closest('[data-act="jr-retirer"]'); if (!b) return;
+    etat[onglet][b.dataset.i].joueurs.splice(Number(b.dataset.m), 1); modifie = true; rendre();
+  });
+  racine.addEventListener("click", (ev) => {
+    const b = ev.target.closest("[data-act^='cl-']"); if (!b) return;
+    const p = etat[onglet][b.dataset.i];
+    p.classement = Array.isArray(p.classement) ? p.classement : [];
+    if (b.dataset.act === "cl-ajouter") p.classement.push({ equipe: "", joueurs: [] });
+    if (b.dataset.act === "cl-suppr") p.classement.splice(Number(b.dataset.n), 1);
+    if (b.dataset.act === "cl-retirer") p.classement[b.dataset.n].joueurs.splice(Number(b.dataset.m), 1);
+    modifie = true; rendre();
+  });
 
   // Recherche de membres (onglet Staff)
   let minuteur;
@@ -391,6 +486,9 @@
     let enregistre = null;
     try { enregistre = (await (await fetch("/api/contenu")).json()).contenu; } catch {}
     charger(enregistre || NOCTIS);
+    await chargerMembres();
+    // nom affiché des membres liés aux streamers
+    etat.streamers.forEach((s) => { if (s.membreId && !s.membre) { const m = MEMBRES.find((x) => x.id === s.membreId); if (m) s.membre = m.nom; } });
     rendre();
   });
 </script>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Streamers · Noctis Core</title>
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
+<meta name="description" content="Les streamers Noctis Core et partenaires.">
+<meta property="og:site_name" content="Noctis Core">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Streamers · Noctis Core">
+<meta property="og:description" content="Les streamers Noctis Core et partenaires.">
+<meta property="og:url" content="https://noctis-core.com/streamers.html">
+<meta property="og:image" content="https://noctis-core.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="597">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /Aperçu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/assets/logo-mini.png" alt="" onerror="this.remove()">NOCTIS CORE</a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="/" >Accueil</a>
+      <a href="/tournois.html">Tournois</a>
+      <a href="/palmares.html">Palmarès</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html" aria-current="page">Streamers</a>
+    </nav>
+    <div id="compte"></div>
+  </div>
+</header>
+<nav class="nav-mobile" aria-label="Navigation mobile">
+  <a href="/" >Accueil</a>
+  <a href="/tournois.html">Tournois</a>
+  <a href="/palmares.html">Palmarès</a>
+  <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html" aria-current="page">Streamers</a>
+</nav>
+<main>
+<section class="page-tete">
+  <h1>Streamers</h1>
+  <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
+  <p class="devise">En live avec la Noctis</p>
+  <p class="intro-page">Les créateurs de la commu et nos streamers partenaires. Passe les soutenir en live.</p>
+</section>
+<section class="bloc"><div class="wrap">
+  <div class="entete-bloc"><h2>Streamers Noctis</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">La team en live</p></div>
+  <ul class="grille-streamers" id="streamers-noctis"></ul>
+</div></section>
+<section class="bloc"><div class="wrap">
+  <div class="entete-bloc"><h2>Streamers partenaires</h2><div class="filet" aria-hidden="true"><i></i><i></i><i></i></div><p class="devise">Ils soutiennent la Noctis</p></div>
+  <ul class="grille-streamers" id="streamers-partenaires"></ul>
+</div></section>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <span>© 2026 Noctis Core [NcG]</span>
+    <nav aria-label="Réseaux">
+      <a data-discord href="#">Discord</a>
+      <a data-twitch href="#">Twitch</a>
+    </nav>
+  </div>
+</footer>
+<script src="/app.js"></script>
+<script>
+  const PLATEFORMES = { twitch: ["Twitch", "#9146ff"], youtube: ["YouTube", "#ff3b3b"], tiktok: ["TikTok", "#25f4ee"], kick: ["Kick", "#53fc18"] };
+  function carte(s) {
+    const [nomP, couleur] = PLATEFORMES[s.plateforme] || PLATEFORMES.twitch;
+    const photo = s.avatar || s.avatarAuto;
+    return `<li class="streamer" style="--p:${couleur}">
+      <div class="av-streamer">${photo ? `<img src="${esc(photo)}" alt="">` : `<span>${esc((s.nom || "?").charAt(0))}</span>`}</div>
+      <span class="plateforme">${nomP}</span>
+      <h3>${esc(s.nom)}</h3>
+      ${s.description ? `<p>${esc(s.description)}</p>` : ""}
+      <div class="liens-streamer">
+        ${s.lien ? `<a class="btn btn-plateforme" href="${esc(s.lien)}" target="_blank" rel="noopener">Voir la chaîne</a>` : ""}
+        ${s.membreId ? `<a class="btn btn-ghost" href="/profil.html?id=${esc(s.membreId)}">Profil</a>` : ""}
+      </div></li>`;
+  }
+  Promise.all([initCompte(), chargerContenu()]).then(() => {
+    const l = NOCTIS.streamers || [];
+    const remplir = (id, type, vide) => {
+      const x = l.filter((s) => s.type === type);
+      document.getElementById(id).innerHTML = x.length ? x.map(carte).join("") : `<li class="events-vide">${vide}</li>`;
+    };
+    remplir("streamers-noctis", "noctis", "Les streamers de la Noctis arrivent bientôt.");
+    remplir("streamers-partenaires", "partenaire", "Les premiers streamers partenaires arrivent bientôt.");
+  });
+</script>
+</body></html>

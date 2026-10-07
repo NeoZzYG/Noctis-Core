@@ -13,5 +13,9 @@ export const handler = async (event) => {
     const m = s.membreId && membres[s.membreId];
     return m ? { ...s, avatarAuto: m.avatar, vu: m.derniereVisite } : s;
   });
+  if (contenu) contenu.streamers = (contenu.streamers || []).map((s) => {
+    const m = s.membreId && membres[s.membreId];
+    return m ? { ...s, avatarAuto: m.avatar } : s;
+  });
   return json(200, { contenu, admin });
 };

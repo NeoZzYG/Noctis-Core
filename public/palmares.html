@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Palmarès · Noctis Core</title>
+<meta name="theme-color" content="#c69428">
+<link rel="icon" href="/assets/favicon.png">
+<!-- Aperçu Discord / réseaux (remplace l'URL si ton domaine change) -->
+<meta name="description" content="Le palmarès Noctis Core : les champions, les plus titrés et l'historique de tous les tournois.">
+<meta property="og:site_name" content="Noctis Core">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Palmarès · Noctis Core">
+<meta property="og:description" content="Le palmarès Noctis Core : les champions, les plus titrés et l'historique de tous les tournois.">
+<meta property="og:url" content="https://noctis-core.com/palmares.html">
+<meta property="og:image" content="https://noctis-core.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="597">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /Aperçu -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="tricolore"></div>
+<header class="entete">
+  <div class="wrap">
+    <a class="marque" href="/"><img src="/assets/logo-mini.png" alt="" onerror="this.remove()">NOCTIS CORE</a>
+    <nav class="nav" aria-label="Navigation principale">
+      <a href="/" >Accueil</a>
+      <a href="/tournois.html">Tournois</a>
+      <a href="/palmares.html" aria-current="page">Palmarès</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html">Streamers</a>
+    </nav>
+    <div id="compte"></div>
+  </div>
+</header>
+<nav class="nav-mobile" aria-label="Navigation mobile">
+  <a href="/" >Accueil</a>
+  <a href="/tournois.html">Tournois</a>
+  <a href="/palmares.html" aria-current="page">Palmarès</a>
+  <a href="/boutique.html">Boutique</a>
+      <a href="/partenaires.html">Partenaires</a>
+      <a href="/streamers.html">Streamers</a>
+</nav>
+<main>
+<section class="page-tete">
+  <h1>Palmarès</h1>
+  <div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>
+  <p class="devise">Hall of fame</p>
+  <p class="intro-page">Toutes les cups où la Noctis a défendu ses couleurs, avec les joueurs qui composaient l'équipe.</p>
+</section>
+<div id="palmares-contenu"><p class="vide wrap">Chargement…</p></div>
+</main>
+<footer class="pied">
+  <div class="wrap">
+    <span>© 2026 Noctis Core [NcG]</span>
+    <nav aria-label="Réseaux">
+      <a data-discord href="#">Discord</a>
+      <a data-twitch href="#">Twitch</a>
+    </nav>
+  </div>
+</footer>
+<script src="/app.js"></script>
+<script>
+  const TROPHEE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>';
+  const zone = document.getElementById("palmares-contenu");
+  const filet = '<div class="filet" aria-hidden="true"><i></i><i></i><i></i></div>';
+  const dateFr = (d, long) => d ? new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: long ? "long" : "short", year: "numeric" }) : "";
+  const cle = (n) => (n || "").trim().toLowerCase();
+  let filtre = "";
+
+  function joueur(j) {
+    const contenu = `${j.avatar ? `<img src="${esc(j.avatar)}" alt="">` : `<span class="ini">${esc((j.nom || "?").charAt(0))}</span>`}${esc(j.nom)}`;
+    return j.membreId ? `<a class="joueur" href="/profil.html?id=${esc(j.membreId)}">${contenu}</a>` : `<span class="joueur">${contenu}</span>`;
+  }
+  function carte(p) {
+    const t = themeJeu(p.jeu || p.tournoi), nbJ = p.nbJoueurs || p.participants;
+    return `<article class="tournoi-passe${p.place === 1 ? " gagne" : ""}${p.image ? " avec-image" : ""}" style="--c:${t.couleur}">
+      ${p.image ? `<div class="banniere-cup"><img src="${esc(p.image)}" alt="" loading="lazy"></div>` : ""}
+      <header>
+        <div><h3>${esc(p.tournoi)}</h3>
+          ${p.organisateur ? `<p class="orga">Organisé par <b>${esc(p.organisateur)}</b></p>` : ""}
+          <p class="meta"><span class="jeu-tag" style="--c:${t.couleur}">${esc(t.nom)}</span>
+            ${p.nbEquipes ? `<span>${p.nbEquipes} équipes</span>` : ""}${nbJ ? `<span>${nbJ} joueurs</span>` : ""}</p></div>
+        <span class="h-date">${dateFr(p.date, true)}</span>
+      </header>
+      <div class="notre-equipe">
+        <span class="medaille-cl">${medaille(p.place)}</span>
+        <div class="equipe">
+          <strong>${esc(p.equipe || "Équipe Noctis")}</strong><small>${texteResultat(p)}</small>
+          ${(p.joueurs || []).length ? `<div class="squad">${p.joueurs.map(joueur).join("")}</div>` : ""}
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function rendre() {
+    const tout = [...(NOCTIS.palmares || [])].filter((p) => p.tournoi).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    if (!tout.length) {
+      zone.innerHTML = `<section class="bloc"><div class="wrap"><div class="palmares-vide grand"><span class="trophee-vide">${TROPHEE}</span><b>Le palmarès commence bientôt</b>Aucune cup n'a encore été enregistrée. La première ligne de l'histoire Noctis reste à écrire : ce sera peut-être avec toi.<p><a class="btn btn-or" href="/tournois.html">Voir les prochains tournois</a></p></div></div></section>`;
+      return;
+    }
+    const jeux = [...new Set(tout.map((p) => themeJeu(p.jeu || p.tournoi).nom))];
+    const histo = filtre ? tout.filter((p) => themeJeu(p.jeu || p.tournoi).nom === filtre) : tout;
+    zone.innerHTML = `<section class="bloc"><div class="wrap">
+      <div class="entete-bloc"><h2>Historique</h2>${filet}<p class="devise">${tout.length} cup${tout.length > 1 ? "s" : ""} disputée${tout.length > 1 ? "s" : ""}</p></div>
+      ${jeux.length > 1 ? `<div class="filtres-jeux"><button type="button" data-filtre=""${!filtre ? ' aria-current="true"' : ""}>Tous</button>${jeux.map((j) => `<button type="button" data-filtre="${esc(j)}" style="--c:${themeJeu(j).couleur}"${filtre === j ? ' aria-current="true"' : ""}>${esc(j)}</button>`).join("")}</div>` : ""}
+      <div class="liste-tournois-passes">${histo.map(carte).join("")}</div>
+    </div></section>`;
+  }
+  zone.addEventListener("click", (e) => { const b = e.target.closest("[data-filtre]"); if (b) { filtre = b.dataset.filtre; rendre(); } });
+  Promise.all([initCompte(), chargerContenu()]).then(rendre);
+</script>
+</body></html>

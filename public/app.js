@@ -126,7 +126,7 @@ async function chargerContenu() {
     if (r.ok) {
       const d = await r.json();
       ADMIN = Boolean(d.admin);
-      if (d.contenu) ["events", "tournois", "jeux", "staff", "produits", "palmares", "reglement"].forEach((k) => {
+      if (d.contenu) ["events", "tournois", "jeux", "staff", "produits", "palmares", "reglement", "partenaires", "streamers"].forEach((k) => {
         if (Array.isArray(d.contenu[k])) NOCTIS[k] = d.contenu[k];
       });
       if (d.contenu && d.contenu.reglages) NOCTIS.reglages = { ...NOCTIS.reglages, ...d.contenu.reglages };
@@ -256,7 +256,7 @@ function actionProduit(p, grand) {
 const RUBRIQUES_ACCUEIL = [["accueil", "Accueil"], ["jeux", "Nos jeux"], ["events", "Events"], ["team", "La team"], ["boutique", "Boutique"], ["discord", "Rejoindre"]];
 (function barreRubriques() {
   const b = document.body;
-  if (b.classList.contains("page-connexion") || document.querySelector(".barre-rubriques")) return;
+  if (b.classList.contains("page-connexion") || location.pathname.startsWith("/admin") || document.querySelector(".barre-rubriques")) return;
   const surAccueil = b.classList.contains("page-accueil");
   const courant = /\/(boutique|produit)\.html/.test(location.pathname) ? "boutique" : "";
   const nav = document.createElement("nav");
@@ -267,3 +267,12 @@ const RUBRIQUES_ACCUEIL = [["accueil", "Accueil"], ["jeux", "Nos jeux"], ["event
     : `<a href="/${id === "accueil" ? "" : `#${id}`}"${id === courant ? ' aria-current="true"' : ""}>${nom}</a>`).join("");
   b.appendChild(nav);
 })();
+
+// ============ PALMARÈS ============
+// Classement d'un tournoi (gère aussi les anciennes lignes vainqueur / finaliste / 3e)
+function classementPalmares(p) {
+  if (Array.isArray(p.classement) && p.classement.length) return p.classement;
+  return [p.vainqueur, p.finaliste, p.troisieme].map((e, n) => ({ place: n + 1, equipe: e || "", joueurs: [] })).filter((r) => r.equipe);
+}
+const medaille = (place) => (place ? ["🥇", "🥈", "🥉"][place - 1] || `${place}e` : "⚔");
+const texteResultat = (p) => (p.place ? `${p.place === 1 ? "1re" : `${p.place}e`} place${p.nbEquipes ? ` sur ${p.nbEquipes}` : ""}` : "Participation");

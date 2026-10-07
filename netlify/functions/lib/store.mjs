@@ -9,7 +9,7 @@ function store(event) {
   return getStore({ name: "noctis", consistency: "strong" });
 }
 
-const VIDE = { events: [], tournois: [], jeux: [], staff: [], produits: [], palmares: [], reglement: [], reglages: { boutiqueEnConstruction: true } };
+const VIDE = { events: [], tournois: [], jeux: [], staff: [], produits: [], palmares: [], reglement: [], partenaires: [], streamers: [], reglages: { boutiqueEnConstruction: true } };
 
 async function lireContenu(event) {
   const c = await store(event).get("contenu", { type: "json" });

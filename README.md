@@ -81,6 +81,15 @@ Page **/admin.html** (lien "Admin" doré dans le menu, visible seulement par les
 - Les données sont stockées dans **Netlify Blobs** (inclus gratuitement dans Netlify, rien à configurer)
 - Tant que rien n'a été enregistré dans l'admin, le site affiche les valeurs par défaut de `public/app.js`
 
+## Palmarès
+- Page **/palmares.html** (lien "Palmarès" dans le menu, à la place de l'ancien "Classement")
+- Historique des cups disputées par une équipe Noctis : nom de la cup, organisateur, jeu, nombre d'équipes et de joueurs, notre équipe, ses joueurs et le classement obtenu. Filtrable par jeu
+- Admin → **Palmarès** : un joueur choisi dans la liste des membres du site est relié à son profil (ses cups et ses titres s'y affichent tout seuls)
+
+## Partenaires et streamers
+- Pages **/partenaires.html** (logo, présentation, lien Discord, site) et **/streamers.html** (streamers Noctis et partenaires : plateforme, lien de chaîne, photo, profil)
+- Tout se gère dans les onglets **Partenaires** et **Streamers** de l'admin
+
 ## Profils des membres
 - Chaque membre personnalise son profil (bouton "Personnaliser mon profil") : présentation, couleur, jeux favoris, Riot ID / Activision ID, réseaux (Twitch, TikTok, YouTube)
 - Le pseudo et la photo viennent de Discord

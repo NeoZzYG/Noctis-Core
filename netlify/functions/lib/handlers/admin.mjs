@@ -4,6 +4,7 @@ import { lireContenu, ecrireContenu, estAdminLive, json, VIDE } from "../store.m
 
 const texte = (v, max = 2000) => String(v == null ? "" : v).slice(0, max);
 const nombre = (v) => (v === "" || v == null || isNaN(Number(v)) ? null : Number(v));
+const lienSur = (v) => { const t = texte(v, 300).trim(); return /^https:\/\/[^\s"<>]+$/i.test(t) ? t : ""; };
 const idSur = (v) => texte(v, 40).replace(/[^a-z0-9-]/gi, "") || Math.random().toString(36).slice(2, 10);
 
 const NETTOYEURS = {
@@ -16,7 +17,18 @@ const NETTOYEURS = {
     return { id: idSur(p.id), nom: texte(p.nom, 80), prix: nombre(p.prix) || 0, description: texte(p.description, 1200), tailles: texte(p.tailles, 120),
       images, image: images[0] || "", lien: texte(p.lien, 300), membres: Boolean(p.membres) };
   },
-  palmares: (p) => ({ id: idSur(p.id), tournoi: texte(p.tournoi, 120), jeu: texte(p.jeu, 60), date: texte(p.date, 20), vainqueur: texte(p.vainqueur, 80), finaliste: texte(p.finaliste, 80), participants: nombre(p.participants) }),
+  palmares: (p) => {
+    const chiffres = (v) => texte(v, 25).replace(/[^0-9]/g, "");
+    // anciennes lignes : on reprend la 1re équipe du classement
+    const ancien = Array.isArray(p.classement) && p.classement[0] ? p.classement[0] : null;
+    const joueurs = (Array.isArray(p.joueurs) ? p.joueurs : ancien ? ancien.joueurs || [] : []).slice(0, 15)
+      .map((j) => ({ membreId: chiffres(j.membreId), nom: texte(j.nom, 60), avatar: texte(j.avatar, 300) })).filter((j) => j.nom);
+    return { id: idSur(p.id), tournoi: texte(p.tournoi, 120), organisateur: texte(p.organisateur, 80), jeu: texte(p.jeu, 60), date: texte(p.date, 20),
+      nbEquipes: nombre(p.nbEquipes), nbJoueurs: nombre(p.nbJoueurs), equipe: texte(p.equipe || (ancien && ancien.equipe), 80), place: nombre(p.place), joueurs, image: texte(p.image, 300) };
+  },
+  partenaires: (s) => ({ id: idSur(s.id), nom: texte(s.nom, 80), logo: texte(s.logo, 300), description: texte(s.description, 500), discord: lienSur(s.discord), site: lienSur(s.site) }),
+  streamers: (s) => ({ id: idSur(s.id), nom: texte(s.nom, 60), type: s.type === "partenaire" ? "partenaire" : "noctis", plateforme: ["twitch", "youtube", "tiktok", "kick"].includes(s.plateforme) ? s.plateforme : "twitch",
+    lien: lienSur(s.lien), membreId: texte(s.membreId, 25).replace(/[^0-9]/g, ""), avatar: texte(s.avatar, 300), description: texte(s.description, 200) }),
 };
 
 export const handler = async (event) => {

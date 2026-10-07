@@ -804,3 +804,158 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 100; pointer-even
 @media (max-width: 520px) { .invite-infos span { white-space: normal; flex-wrap: wrap; } }
 /* Message "aucun event" aussi large que le bandeau de filtre */
 .events:has(.events-vide) { grid-template-columns: 1fr; }
+
+/* ================= PAGE PALMARÈS ================= */
+.bloc-champion { isolation: isolate; }
+.bloc-champion::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 50% 60% at 50% 30%, rgba(240,207,122,.16), transparent 70%), radial-gradient(ellipse 40% 50% at 50% 100%, color-mix(in srgb, var(--c) 18%, transparent), transparent 70%); }
+.champion { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: end; max-width: 1000px; margin: 0 auto; }
+.champion:has(> :only-child) { grid-template-columns: 1fr; text-align: center; }
+.champion-tete { display: flex; flex-direction: column; align-items: flex-start; gap: .7rem; }
+.champion:has(> :only-child) .champion-tete { align-items: center; }
+.trophee-grand svg { width: 72px; height: 72px; stroke: #f0cf7a; fill: rgba(240,207,122,.12); stroke-width: 1.4; filter: drop-shadow(0 0 22px rgba(240,207,122,.5)); }
+.champion h3 { font: 700 clamp(2.4rem, 6vw, 4.2rem)/1 var(--display); background: linear-gradient(175deg, #fff6d8, #f0cf7a 40%, #c69428 70%, #8a6418); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.champion p { color: #c9ccd4; font-size: 1.05rem; } .champion p b { color: var(--blanc); }
+.mvp b { color: #f0cf7a !important; }
+.jeu-tag { width: fit-content; padding: .25rem .7rem; border-radius: 3px; font-size: .8rem; font-weight: 700; color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); background: color-mix(in srgb, var(--c) 10%, transparent); }
+.podium { display: grid; grid-template-columns: repeat(3, 1fr); align-items: end; gap: .6rem; }
+.marche { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .25rem; }
+.marche strong { font-size: 1rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.marche em { font-style: normal; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gris); }
+.marche .medaille { font-size: 1.8rem; }
+.socle { width: 100%; margin-top: .4rem; display: grid; place-items: center; font: 700 2rem var(--display); color: rgba(255,255,255,.25); border-radius: 4px 4px 0 0; border: 1px solid #262936; border-bottom: 0; background: linear-gradient(180deg, #14161e, #0a0b10); }
+.m1 { order: 2; } .m2 { order: 1; } .m3 { order: 3; }
+.m1 .socle { height: 150px; background: linear-gradient(180deg, rgba(198,148,40,.35), rgba(198,148,40,.06)); border-color: rgba(198,148,40,.6); color: rgba(255,240,200,.6); }
+.m2 .socle { height: 105px; } .m3 .socle { height: 75px; }
+.classement { list-style: none; padding: 0; max-width: 900px; margin: 0 auto; display: grid; gap: .5rem; }
+.classement li { display: grid; grid-template-columns: 54px 1fr repeat(3, 92px); align-items: center; gap: .8rem; padding: .9rem 1.1rem; border-radius: 6px; background: rgba(10,11,16,.85); border: 1px solid #1c1f29; backdrop-filter: blur(4px); }
+.classement li.top1 { border-color: rgba(198,148,40,.7); background: linear-gradient(90deg, rgba(198,148,40,.16), rgba(10,11,16,.85) 60%); }
+.classement li.top2 { border-color: rgba(200,205,215,.4); } .classement li.top3 { border-color: rgba(205,127,50,.45); }
+.classement .rang { font: 700 1.4rem var(--display); text-align: center; color: var(--gris); }
+.classement .top .rang { font-size: 1.8rem; }
+.classement .qui { min-width: 0; display: flex; flex-direction: column; }
+.classement .qui strong { font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.classement .qui small { color: var(--gris); font-size: .82rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compte { display: flex; flex-direction: column; align-items: center; color: var(--gris); }
+.compte b { font: 700 1.5rem var(--display); color: var(--blanc); line-height: 1; }
+.compte small { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+.compte.or b { color: #f0cf7a; } .compte svg { display: none; }
+.filtres-jeux { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-bottom: 1.5rem; }
+.filtres-jeux button { --c: var(--or); padding: .45rem 1rem; border-radius: 999px; border: 1px solid #2a2d38; background: #0b0c11; color: var(--gris); font: 600 .9rem var(--texte); cursor: pointer; }
+.filtres-jeux button:hover { color: var(--blanc); }
+.filtres-jeux button[aria-current] { color: var(--c); border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
+.historique { list-style: none; padding: 0; max-width: 1000px; margin: 0 auto; display: grid; gap: .5rem; }
+.historique li { display: grid; grid-template-columns: 110px minmax(0, 1.2fr) minmax(0, 1.6fr) 90px; align-items: center; gap: 1rem; padding: .9rem 1.1rem; border-radius: 6px; background: #0b0c11; border: 1px solid #1c1f29; border-left: 3px solid var(--c); }
+.h-date { color: var(--gris); font-size: .9rem; }
+.h-tournoi { display: flex; flex-direction: column; gap: .35rem; min-width: 0; } .h-tournoi strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h-podium { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; color: #c9ccd4; font-size: .92rem; }
+.h-podium .vainqueur { color: #f0cf7a; font-weight: 700; font-size: 1rem; display: inline-flex; align-items: center; gap: .4rem; }
+.h-podium .vainqueur svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+.h-joueurs { color: var(--gris); font-size: .88rem; text-align: right; }
+.palmares-vide.grand { padding: 4rem 1.5rem; max-width: 640px; margin: 0 auto; }
+.palmares-vide.grand p { margin-top: 1.5rem; }
+.trophee-vide svg { width: 64px; height: 64px; stroke: rgba(198,148,40,.6); fill: none; stroke-width: 1.4; margin-bottom: 1rem; }
+@media (max-width: 760px) {
+  .champion { grid-template-columns: 1fr; }
+  .classement li { grid-template-columns: 40px 1fr 70px; }
+  .classement li .compte:not(.or) { display: none; }
+  .historique li { grid-template-columns: 1fr; gap: .5rem; }
+  .h-joueurs { text-align: left; }
+}
+
+/* ================= MENU : plus de liens ================= */
+@media (max-width: 1280px) { .nav { gap: .9rem; } .nav a { font-size: .95rem; } }
+@media (max-width: 1100px) and (min-width: 761px) { .entete .wrap { gap: .8rem; } .marque { font-size: 1rem; } .nav { gap: .7rem; } .nav a { font-size: .9rem; } }
+
+/* ================= PALMARÈS DÉTAILLÉ ================= */
+.liste-tournois-passes { display: grid; gap: 1.2rem; max-width: 960px; margin: 0 auto; }
+.tournoi-passe { border-radius: 8px; background: #0b0c11; border: 1px solid #1c1f29; border-top: 3px solid var(--c); overflow: hidden; }
+.tournoi-passe header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.2rem 1.4rem; border-bottom: 1px solid #1c1f29;
+  background: radial-gradient(ellipse 60% 120% at 0% 0%, color-mix(in srgb, var(--c) 14%, transparent), transparent 70%); }
+.tournoi-passe h3 { font: 700 1.5rem/1.15 var(--display); }
+.tournoi-passe .meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; margin-top: .5rem; color: var(--gris); font-size: .9rem; }
+.tournoi-passe .h-date { white-space: nowrap; padding-top: .3rem; }
+.top { list-style: none; margin: 0; padding: .6rem 1.4rem 1rem; display: grid; gap: .2rem; }
+.place { display: grid; grid-template-columns: 52px 1fr; align-items: start; gap: .6rem; padding: .7rem 0; border-bottom: 1px solid #14161e; }
+.place:last-child { border-bottom: 0; }
+.medaille-cl { font: 700 1.5rem/1.2 var(--display); text-align: center; color: var(--gris); }
+.place:not(.p1):not(.p2):not(.p3) .medaille-cl { font-size: 1.05rem; padding-top: .2rem; }
+.equipe strong { font-size: 1.1rem; }
+.p1 .equipe strong { color: #f0cf7a; font-size: 1.25rem; }
+.squad { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.joueur { display: inline-flex; align-items: center; gap: .4rem; padding: .2rem .65rem .2rem .25rem; border-radius: 999px; background: #14161e; border: 1px solid #23262f; font-size: .88rem; color: #d7d9e0; text-decoration: none; }
+a.joueur:hover { border-color: var(--or); color: var(--blanc); }
+.joueur img, .joueur .ini { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; flex: none; }
+.joueur .ini { display: grid; place-items: center; background: #23262f; font-size: .72rem; font-weight: 700; color: var(--gris); }
+.mvp-ligne { padding: .8rem 1.4rem; border-top: 1px solid #1c1f29; color: var(--gris); font-size: .92rem; }
+.mvp-ligne a, .mvp-ligne b { color: #f0cf7a; font-weight: 700; text-decoration: none; }
+/* Palmarès sur le profil */
+.palmares-perso { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+.palmares-perso li { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: .7rem; padding: .6rem .8rem; border-radius: 6px; background: #0b0c11; border-left: 3px solid var(--c); }
+.palmares-perso .medaille-cl { font-size: 1.3rem; }
+.pp-tournoi { display: flex; flex-direction: column; min-width: 0; } .pp-tournoi small { color: var(--gris); }
+.lien-palmares { margin-top: .9rem; } .lien-palmares a { color: var(--or); text-decoration: none; font-weight: 600; }
+.infos dd small { font-size: .8rem; color: var(--gris); font-weight: 500; }
+/* Admin : éditeur de classement */
+.champ-classement { gap: .5rem; }
+.ligne-classement { display: grid; grid-template-columns: 46px 1fr 34px; gap: .7rem; align-items: start; padding: .7rem; border-radius: 6px; background: #050507; border: 1px solid #1c1f29; }
+.place-cl { font: 700 1.3rem/2.4rem var(--display); text-align: center; color: var(--gris); }
+.cl-contenu { display: flex; flex-direction: column; gap: .5rem; }
+.cl-contenu input[data-cl="equipe"] { width: 100%; padding: .6rem .8rem; border-radius: 4px; border: 1px solid #262936; background: #0b0c11; color: var(--blanc); font: 600 1rem var(--texte); }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.chip { display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .3rem .2rem .55rem; border-radius: 999px; background: #14161e; border: 1px dashed #3a3e4d; font-size: .85rem; }
+.chip.lie { border-style: solid; border-color: rgba(198,148,40,.55); }
+.chip img { width: 20px; height: 20px; border-radius: 50%; margin-left: -.3rem; }
+.chip button { width: 20px; height: 20px; border-radius: 50%; border: 0; background: #23262f; color: var(--gris); cursor: pointer; line-height: 1; }
+.chip button:hover { background: var(--rouge); color: #fff; }
+.ajout-joueur { flex: 1; min-width: 200px; padding: .4rem .7rem; border-radius: 999px; border: 1px solid #262936; background: #0b0c11; color: var(--blanc); font: 400 .9rem var(--texte); }
+.cl-contenu input:focus { outline: none; border-color: var(--or); }
+.suppr-cl { width: 34px; height: 34px; border-radius: 4px; border: 1px solid #262936; background: #0b0c11; color: #ff6b76; cursor: pointer; }
+.ajout-place { width: fit-content; padding: .5rem .9rem; font-size: .9rem; }
+.champ input[list="liste-membres-site"] { width: 100%; padding: .65rem .8rem; border-radius: 4px; border: 1px solid #262936; background: #050507; color: var(--blanc); font: 400 1rem var(--texte); }
+
+/* ================= PARTENAIRES ================= */
+.grille-partenaires { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 340px)); justify-content: center; gap: 1.4rem; }
+.partenaire { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .8rem; padding: 2rem 1.5rem 1.6rem; border-radius: 8px; background: linear-gradient(180deg, #0f1118, #08090d); border: 1px solid #1c1f29; transition: border-color .3s, transform .3s; }
+.partenaire:hover { border-color: rgba(198,148,40,.55); transform: translateY(-3px); }
+.logo-partenaire { width: 120px; height: 120px; border-radius: 16px; display: grid; place-items: center; background: radial-gradient(circle, rgba(255,255,255,.06), transparent 70%), #050507; border: 1px solid #23262f; overflow: hidden; }
+.logo-partenaire img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
+.logo-partenaire span { font: 700 3rem var(--display); color: var(--or); }
+.partenaire h2 { font: 700 1.4rem var(--display); }
+.partenaire p { color: #c3c6cf; line-height: 1.55; }
+.liens-partenaire { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: auto; padding-top: .4rem; }
+.liens-partenaire .btn { padding: .6rem 1rem; font-size: .92rem; }
+.liens-partenaire svg { width: 18px; height: 18px; }
+
+/* ================= STREAMERS ================= */
+.grille-streamers { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 260px)); justify-content: center; gap: 1.2rem; }
+.streamer { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: .55rem; padding: 1.8rem 1.2rem 1.4rem; border-radius: 8px; background: #0b0c11; border: 1px solid #1c1f29; border-top: 3px solid var(--p); }
+.av-streamer { width: 96px; height: 96px; border-radius: 50%; padding: 3px; background: var(--p); }
+.av-streamer img, .av-streamer span { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; border: 3px solid #0b0c11; background: #14161e; font: 700 2rem var(--display); color: var(--blanc); }
+.plateforme { font-size: .72rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--p); }
+.streamer h3 { font: 700 1.25rem var(--display); }
+.streamer p { color: var(--gris); font-size: .92rem; }
+.liens-streamer { display: flex; gap: .5rem; margin-top: .3rem; }
+.liens-streamer .btn { padding: .5rem .9rem; font-size: .9rem; }
+.btn-plateforme { background: var(--p); color: #fff; }
+.streamer[style*="#25f4ee"] .btn-plateforme, .streamer[style*="#53fc18"] .btn-plateforme { color: #07080c; }
+.btn-plateforme:hover { filter: brightness(1.1); }
+
+.liens-streamer .btn, .liens-partenaire .btn { white-space: nowrap; }
+
+/* Palmarès : cups disputées par la Noctis */
+.tournoi-passe .orga { margin-top: .35rem; color: var(--gris); font-size: .92rem; } .tournoi-passe .orga b { color: var(--blanc); }
+.notre-equipe { display: grid; grid-template-columns: 56px 1fr; gap: .8rem; align-items: start; padding: 1.1rem 1.4rem 1.3rem; }
+.notre-equipe .medaille-cl { font-size: 1.8rem; line-height: 1.1; }
+.notre-equipe .equipe strong { font-size: 1.2rem; }
+.notre-equipe .equipe small { display: block; margin-top: .15rem; color: var(--gris); font-size: .88rem; }
+.tournoi-passe.gagne { border-color: rgba(198,148,40,.45); }
+.tournoi-passe.gagne .notre-equipe .equipe strong { color: #f0cf7a; }
+
+/* Palmarès : image de la cup */
+.tournoi-passe.avec-image { position: relative; }
+.banniere-cup { position: relative; height: clamp(150px, 22vw, 230px); overflow: hidden; background: #050507; }
+.banniere-cup img { width: 100%; height: 100%; object-fit: cover; }
+.banniere-cup::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 35%, #0b0c11); }
+.tournoi-passe.avec-image header { margin-top: -64px; position: relative; z-index: 1; background: none; border-bottom-color: #1c1f29; }
+.tournoi-passe.avec-image header h3 { text-shadow: 0 2px 14px #000; }
